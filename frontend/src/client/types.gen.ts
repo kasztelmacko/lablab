@@ -14,14 +14,30 @@ export type HTTPValidationError = {
 }
 
 export type ItemCreate = {
-  title: string
-  description?: string | null
+  item_name: string
+  current_room?: string | null
+  table_name?: string | null
+  system_name?: string | null
+  current_owner_id?: string | null
+  taken_at?: string | null
+  item_img_url?: string | null
+  item_vendor?: string | null
+  item_params?: string | null
+  is_available?: boolean
 }
 
 export type ItemPublic = {
-  title: string
-  description?: string | null
-  id: string
+  item_id: string
+  item_name: string
+  current_room?: string | null
+  table_name?: string | null
+  system_name?: string | null
+  current_owner_id?: string | null
+  taken_at?: string | null
+  item_img_url?: string | null
+  item_vendor?: string | null
+  item_params?: string | null
+  is_available?: boolean
   owner_id: string
 }
 
@@ -31,8 +47,19 @@ export type ItemsPublic = {
 }
 
 export type ItemUpdate = {
-  title?: string | null
-  description?: string | null
+  item_name?: string | null
+  item_img_url?: string | null
+  item_vendor?: string | null
+  item_params?: string | null
+}
+
+export type ItemTake = {
+  table_name?: string | null
+  current_room?: string | null
+  system_name?: string | null
+  current_owner_id?: string | null
+  taken_at?: string | null
+  is_available?: boolean
 }
 
 export type Message = {
@@ -63,11 +90,15 @@ export type UserCreate = {
 }
 
 export type UserPublic = {
+  user_id: string
   email: string
   is_active?: boolean
   is_superuser?: boolean
   full_name?: string | null
-  id: string
+  is_part_of_lab?: boolean
+  can_edit_items?: boolean
+  can_edit_labs?: boolean
+  can_edit_users?: boolean
 }
 
 export type UserRegister = {
@@ -94,6 +125,40 @@ export type UserUpdateMe = {
   email?: string | null
 }
 
+export type UserPermissionsUpdate = {
+  is_part_of_lab?: boolean | null
+  can_edit_items?: boolean | null
+  can_edit_labs?: boolean | null
+  can_edit_users?: boolean | null
+}
+
+export type RoomBase = {
+  room_number: string;
+  room_place: string;
+  room_owner_id: string;
+}
+
+// RoomCreate
+export type RoomCreate = RoomBase;
+
+// RoomUpdate
+export type RoomUpdate = {
+  room_number?: string | null;
+  room_place?: string | null;
+  room_owner_id: string;
+}
+
+// RoomPublic
+export type RoomPublic = RoomBase & {
+  room_id: string;
+}
+
+// RoomsPublic
+export type RoomsPublic = {
+  data: Array<RoomPublic>;
+  count: number;
+}
+
 export type ValidationError = {
   loc: Array<string | number>
   msg: string
@@ -114,23 +179,63 @@ export type ItemsCreateItemData = {
 export type ItemsCreateItemResponse = ItemPublic
 
 export type ItemsReadItemData = {
-  id: string
+  item_id: string
 }
 
 export type ItemsReadItemResponse = ItemPublic
 
 export type ItemsUpdateItemData = {
-  id: string
+  item_id: string
   requestBody: ItemUpdate
+}
+
+export type ItemTakeItemResponse = ItemPublic
+
+export type ItemTakeItemData = {
+  item_id: string
+  requestBody: ItemTake
 }
 
 export type ItemsUpdateItemResponse = ItemPublic
 
 export type ItemsDeleteItemData = {
-  id: string
+  item_id: string
 }
 
 export type ItemsDeleteItemResponse = Message
+
+export type RoomsReadRoomsData = {
+  limit?: number
+  skip?: number
+}
+
+export type RoomsReadRoomsResponse = RoomsPublic
+
+export type RoomsCreateRoomData = {
+  requestBody: RoomCreate
+}
+
+export type RoomsCreateRoomResponse = RoomPublic
+
+export type RoomsReadRoomData = {
+  room_id: string
+}
+
+export type RoomsReadRoomResponse = RoomPublic
+
+export type RoomsUpdateRoomData = {
+  room_id: string
+  requestBody: RoomUpdate
+}
+
+export type RoomsUpdateRoomResponse = RoomPublic
+
+export type RoomsDeleteRoomData = {
+  room_id: string
+}
+
+export type RoomsDeleteRoomResponse = Message
+
 
 export type LoginLoginAccessTokenData = {
   formData: Body_login_login_access_token
@@ -194,20 +299,20 @@ export type UsersRegisterUserData = {
 export type UsersRegisterUserResponse = UserPublic
 
 export type UsersReadUserByIdData = {
-  userId: string
+  user_id: string
 }
 
 export type UsersReadUserByIdResponse = UserPublic
 
 export type UsersUpdateUserData = {
   requestBody: UserUpdate
-  userId: string
+  user_id: string
 }
 
 export type UsersUpdateUserResponse = UserPublic
 
 export type UsersDeleteUserData = {
-  userId: string
+  user_id: string
 }
 
 export type UsersDeleteUserResponse = Message
