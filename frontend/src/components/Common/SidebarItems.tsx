@@ -7,7 +7,7 @@ const items = [
   { icon: FiHome, title: "Dashboard", path: "/" },
   { icon: FiBriefcase, title: "Items", path: "/items" },
   { icon: FiSettings, title: "User Settings", path: "/settings" },
-  { icon: FiUsers, title: "Admin", path: "/admin" },
+  { icon: FiUsers, title: "Users", path: "/admin" },
 ]
 
 interface SidebarItemsProps {

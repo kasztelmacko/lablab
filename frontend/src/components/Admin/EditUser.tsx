@@ -1,7 +1,6 @@
 import {
   Button,
   Checkbox,
-  Flex,
   FormControl,
   Modal,
   ModalBody,
@@ -94,28 +93,26 @@ const EditUser = ({ user, isOpen, onClose }: EditUserProps) => {
           <ModalHeader>Edit User Permissions</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
-            <Flex direction={{ base: "column", md: "row" }} gap={4}>
-              <FormControl>
-                <Checkbox {...register("is_part_of_lab")} colorScheme="teal">
-                  Is part of lab?
-                </Checkbox>
-              </FormControl>
-              <FormControl>
-                <Checkbox {...register("can_edit_items")} colorScheme="teal">
-                  Can edit items?
-                </Checkbox>
-              </FormControl>
-              <FormControl>
-                <Checkbox {...register("can_edit_labs")} colorScheme="teal">
-                  Can edit labs?
-                </Checkbox>
-              </FormControl>
-              <FormControl>
-                <Checkbox {...register("can_edit_users")} colorScheme="teal">
-                  Can edit users?
-                </Checkbox>
-              </FormControl>
-            </Flex>
+            <FormControl>
+              <Checkbox {...register("is_part_of_lab")} colorScheme="teal">
+                Is part of lab?
+              </Checkbox>
+            </FormControl>
+            <FormControl>
+              <Checkbox {...register("can_edit_items")} colorScheme="teal">
+                Can edit items?
+              </Checkbox>
+            </FormControl>
+            <FormControl>
+              <Checkbox {...register("can_edit_labs")} colorScheme="teal">
+                Can edit labs?
+              </Checkbox>
+            </FormControl>
+            <FormControl>
+              <Checkbox {...register("can_edit_users")} colorScheme="teal">
+                Can edit users?
+              </Checkbox>
+            </FormControl>
           </ModalBody>
 
           <ModalFooter gap={3}>
