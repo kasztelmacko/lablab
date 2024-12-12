@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_layout/items")({
   validateSearch: (search: itemsSearchParams) => itemsSearchSchema.parse(search),
 })
 
-const PER_PAGE = 5
+const PER_PAGE = 30
 
 function getItemsQueryOptions({ page }: { page: number }) {
   return {

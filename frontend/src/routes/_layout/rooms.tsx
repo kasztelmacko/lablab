@@ -32,7 +32,7 @@ import {
     validateSearch: (search: roomsSearchParams) => roomsSearchSchema.parse(search),
   })
   
-  const PER_PAGE = 5
+  const PER_PAGE = 30
   
   function getRoomsQueryOptions({ page }: { page: number }) {
     return {
