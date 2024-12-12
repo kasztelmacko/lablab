@@ -1,6 +1,5 @@
 import {
   AlertDialog,
-  // AlertDialogBody,
   AlertDialogContent,
   AlertDialogFooter,
   AlertDialogHeader,
@@ -11,7 +10,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import React from "react"
 import { useForm } from "react-hook-form"
 
-import { ItemsService, UsersService } from "../../client"
+import { ItemsService, RoomsService, UsersService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 
 interface DeleteProps {
@@ -35,6 +34,8 @@ const Delete = ({ type, id, isOpen, onClose }: DeleteProps) => {
       await ItemsService.deleteItem({ item_id: id }) // Use item_id for Item
     } else if (type === "User") {
       await UsersService.deleteUser({ user_id: id }) // Use user_id for User
+    } else if (type === "Room") {
+      await RoomsService.deleteRoom({ room_id: id }) // Use room_id for Room
     } else {
       throw new Error(`Unexpected type: ${type}`)
     }
@@ -59,43 +60,48 @@ const Delete = ({ type, id, isOpen, onClose }: DeleteProps) => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: [type === "Item" ? "items" : "users"],
+        queryKey:
+          type === "Item"
+            ? ["items"]
+            : type === "User"
+            ? ["users"]
+            : type === "Room"
+            ? ["rooms"]
+            : [],
       })
     },
   })
 
-  const onSubmit = async () => {
+  const onSubmit = () => {
     mutation.mutate(id)
   }
 
   return (
-    <>
-      <AlertDialog
-        isOpen={isOpen}
-        onClose={onClose}
-        leastDestructiveRef={cancelRef}
-        size={{ base: "sm", md: "md" }}
-        isCentered
-      >
-        <AlertDialogOverlay>
-          <AlertDialogContent as="form" onSubmit={handleSubmit(onSubmit)}>
-            <AlertDialogHeader>Delete {type}</AlertDialogHeader>
-            <AlertDialogFooter gap={3}>
-              <Button variant="danger" type="submit" isLoading={isSubmitting}>
-                Delete
-              </Button>
-              <Button
-                ref={cancelRef}
-                onClick={onClose}
-                isDisabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-    </>
+    <AlertDialog
+      isOpen={isOpen}
+      onClose={onClose}
+      leastDestructiveRef={cancelRef}
+      size={{ base: "sm", md: "md" }}
+      isCentered
+    >
+      <AlertDialogOverlay>
+        <AlertDialogContent as="form" onSubmit={handleSubmit(onSubmit)}>
+          <AlertDialogHeader>Delete {type}</AlertDialogHeader>
+          <AlertDialogFooter gap={3}>
+            <Button
+              variant="danger"
+              onClick={onSubmit}
+              isLoading={isSubmitting}
+            >
+              Delete
+            </Button>
+            <Button ref={cancelRef} onClick={onClose}>
+              Cancel
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialogOverlay>
+    </AlertDialog>
   )
 }
 

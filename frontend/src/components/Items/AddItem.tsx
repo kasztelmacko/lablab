@@ -11,11 +11,18 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Select,
 } from "@chakra-ui/react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { type SubmitHandler, useForm } from "react-hook-form"
 
-import { type ApiError, type ItemCreate, ItemsService } from "../../client"
+import {
+  type ApiError,
+  type ItemCreate,
+  type RoomPublic,
+  ItemsService,
+  RoomsService,
+} from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import { handleError } from "../../utils"
 
@@ -27,6 +34,13 @@ interface AddItemProps {
 const AddItem = ({ isOpen, onClose }: AddItemProps) => {
   const queryClient = useQueryClient()
   const showToast = useCustomToast()
+
+  // Fetch the list of rooms
+  const { data: rooms, isLoading: isRoomsLoading } = useQuery<RoomPublic[]>({
+    queryKey: ["rooms"],
+    queryFn: () => RoomsService.readRooms({}).then((response) => response.data),
+  })
+
   const {
     register,
     handleSubmit,
@@ -70,83 +84,92 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
   }
 
   return (
-    <>
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        size={{ base: "sm", md: "md" }}
-        isCentered
-      >
-        <ModalOverlay />
-        <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
-          <ModalHeader>Add Item</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-            <FormControl isRequired isInvalid={!!errors.item_name}>
-              <FormLabel htmlFor="item_name">Item Name</FormLabel>
-              <Input
-                id="item_name"
-                {...register("item_name", {
-                  required: "Item name is required.",
-                })}
-                placeholder="Item Name"
-                type="text"
-              />
-              {errors.item_name && (
-                <FormErrorMessage>{errors.item_name.message}</FormErrorMessage>
-              )}
-            </FormControl>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size={{ base: "sm", md: "md" }}
+      isCentered
+    >
+      <ModalOverlay />
+      <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
+        <ModalHeader>Add Item</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody pb={6}>
+          <FormControl isRequired isInvalid={!!errors.item_name}>
+            <FormLabel htmlFor="item_name">Item Name</FormLabel>
+            <Input
+              id="item_name"
+              {...register("item_name", {
+                required: "Item name is required.",
+              })}
+              placeholder="Item Name"
+              type="text"
+            />
+            {errors.item_name && (
+              <FormErrorMessage>{errors.item_name.message}</FormErrorMessage>
+            )}
+          </FormControl>
 
-            <FormControl mt={4}>
-              <FormLabel htmlFor="current_room">Current Room</FormLabel>
-              <Input
-                id="current_room"
-                {...register("current_room")}
-                placeholder="Current Room"
-                type="text"
-              />
-            </FormControl>
+          <FormControl mt={4} isRequired isInvalid={!!errors.current_room}>
+            <FormLabel htmlFor="current_room">Current Room</FormLabel>
+            <Select
+              id="current_room"
+              {...register("current_room", {
+                required: "Current room is required.",
+              })}
+              placeholder="Select a room"
+              isDisabled={isRoomsLoading}
+            >
+              {rooms?.map((room: RoomPublic) => (
+                <option key={room.room_id} value={room.room_id}>
+                  {room.room_number} - {room.room_place}
+                </option>
+              ))}
+            </Select>
+            {errors.current_room && (
+              <FormErrorMessage>{errors.current_room.message}</FormErrorMessage>
+            )}
+          </FormControl>
 
-            <FormControl mt={4}>
-              <FormLabel htmlFor="item_img_url">Item Image URL</FormLabel>
-              <Input
-                id="item_img_url"
-                {...register("item_img_url")}
-                placeholder="Item Image URL"
-                type="text"
-              />
-            </FormControl>
+          <FormControl mt={4}>
+            <FormLabel htmlFor="item_img_url">Item Image URL</FormLabel>
+            <Input
+              id="item_img_url"
+              {...register("item_img_url")}
+              placeholder="Item Image URL"
+              type="text"
+            />
+          </FormControl>
 
-            <FormControl mt={4}>
-              <FormLabel htmlFor="item_vendor">Item Vendor</FormLabel>
-              <Input
-                id="item_vendor"
-                {...register("item_vendor")}
-                placeholder="Item Vendor"
-                type="text"
-              />
-            </FormControl>
+          <FormControl mt={4}>
+            <FormLabel htmlFor="item_vendor">Item Vendor</FormLabel>
+            <Input
+              id="item_vendor"
+              {...register("item_vendor")}
+              placeholder="Item Vendor"
+              type="text"
+            />
+          </FormControl>
 
-            <FormControl mt={4}>
-              <FormLabel htmlFor="item_params">Item Parameters</FormLabel>
-              <Input
-                id="item_params"
-                {...register("item_params")}
-                placeholder="Item Parameters"
-                type="text"
-              />
-            </FormControl>
-          </ModalBody>
+          <FormControl mt={4}>
+            <FormLabel htmlFor="item_params">Item Parameters</FormLabel>
+            <Input
+              id="item_params"
+              {...register("item_params")}
+              placeholder="Item Parameters"
+              type="text"
+            />
+          </FormControl>
+        </ModalBody>
 
-          <ModalFooter gap={3}>
-            <Button variant="primary" type="submit" isLoading={isSubmitting}>
-              Save
-            </Button>
-            <Button onClick={onClose}>Cancel</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </>
+        <ModalFooter gap={3}>
+          <Button variant="primary" type="submit" isLoading={isSubmitting}>
+            Save
+          </Button>
+          <Button onClick={onClose}>Cancel</Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   )
 }
 

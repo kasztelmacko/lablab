@@ -9,28 +9,46 @@ import {
 import { BsThreeDotsVertical } from "react-icons/bs"
 import { FiEdit, FiTrash } from "react-icons/fi"
 
-import type { ItemPublic, UserPublic } from "../../client"
+import type { ItemPublic, UserPublic, RoomPublic } from "../../client"
 import EditUser from "../Admin/EditUser"
 import EditItem from "../Items/EditItem"
+import EditRoom from "../Rooms/EditRoom"
 import Delete from "./DeleteAlert"
 
 interface ActionsMenuProps {
   type: string
-  value: ItemPublic | UserPublic
+  value: ItemPublic | UserPublic | RoomPublic
   disabled?: boolean
 }
 
 const ActionsMenu = ({ type, value, disabled }: ActionsMenuProps) => {
-  const editUserModal = useDisclosure()
+  const editModal = useDisclosure()
   const deleteModal = useDisclosure()
 
-  const isItemPublic = (value: ItemPublic | UserPublic): value is ItemPublic => {
+  // Type guards to determine the type of value
+  const isItemPublic = (value: any): value is ItemPublic => {
     return "item_id" in value
   }
 
+  const isUserPublic = (value: any): value is UserPublic => {
+    return "user_id" in value
+  }
+
+  const isRoomPublic = (value: any): value is RoomPublic => {
+    return "room_id" in value
+  }
+
   // Get the correct ID based on the type
-  const getId = (value: ItemPublic | UserPublic): string => {
-    return isItemPublic(value) ? value.item_id : value.user_id
+  const getId = (value: ItemPublic | UserPublic | RoomPublic): string => {
+    if (isItemPublic(value)) {
+      return value.item_id
+    } else if (isUserPublic(value)) {
+      return value.user_id
+    } else if (isRoomPublic(value)) {
+      return value.room_id
+    } else {
+      throw new Error("Unexpected type")
+    }
   }
 
   return (
@@ -44,7 +62,7 @@ const ActionsMenu = ({ type, value, disabled }: ActionsMenuProps) => {
         />
         <MenuList>
           <MenuItem
-            onClick={editUserModal.onOpen}
+            onClick={editModal.onOpen}
             icon={<FiEdit fontSize="16px" />}
           >
             Edit {type}
@@ -57,19 +75,25 @@ const ActionsMenu = ({ type, value, disabled }: ActionsMenuProps) => {
             Delete {type}
           </MenuItem>
         </MenuList>
-        {type === "User" ? (
+        {isUserPublic(value) ? (
           <EditUser
-            user={value as UserPublic}
-            isOpen={editUserModal.isOpen}
-            onClose={editUserModal.onClose}
+            user={value}
+            isOpen={editModal.isOpen}
+            onClose={editModal.onClose}
           />
-        ) : (
+        ) : isItemPublic(value) ? (
           <EditItem
-            item={value as ItemPublic}
-            isOpen={editUserModal.isOpen}
-            onClose={editUserModal.onClose}
+            item={value}
+            isOpen={editModal.isOpen}
+            onClose={editModal.onClose}
           />
-        )}
+        ) : isRoomPublic(value) ? (
+          <EditRoom
+            room={value}
+            isOpen={editModal.isOpen}
+            onClose={editModal.onClose}
+          />
+        ) : null}
         <Delete
           type={type}
           id={getId(value)}
