@@ -41,12 +41,17 @@ const EditItem = ({ item, isOpen, onClose }: EditItemProps) => {
   } = useForm<ItemUpdate>({
     mode: "onBlur",
     criteriaMode: "all",
-    defaultValues: item,
+    defaultValues: {
+      item_name: item.item_name,
+      item_img_url: item.item_img_url,
+      item_vendor: item.item_vendor,
+      item_params: item.item_params,
+    },
   })
 
   const mutation = useMutation({
     mutationFn: (data: ItemUpdate) =>
-      ItemsService.updateItem({ id: item.id, requestBody: data }),
+      ItemsService.updateItem({ item_id: item.item_id, requestBody: data }),
     onSuccess: () => {
       showToast("Success!", "Item updated successfully.", "success")
       onClose()
@@ -59,7 +64,7 @@ const EditItem = ({ item, isOpen, onClose }: EditItemProps) => {
     },
   })
 
-  const onSubmit: SubmitHandler<ItemUpdate> = async (data) => {
+  const onSubmit: SubmitHandler<ItemUpdate> = async (data: ItemUpdate) => {
     mutation.mutate(data)
   }
 
@@ -81,25 +86,46 @@ const EditItem = ({ item, isOpen, onClose }: EditItemProps) => {
           <ModalHeader>Edit Item</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
-            <FormControl isInvalid={!!errors.title}>
-              <FormLabel htmlFor="title">Title</FormLabel>
+            <FormControl isInvalid={!!errors.item_name}>
+              <FormLabel htmlFor="item_name">Item Name</FormLabel>
               <Input
-                id="title"
-                {...register("title", {
-                  required: "Title is required",
+                id="item_name"
+                {...register("item_name", {
+                  required: "Item name is required",
                 })}
                 type="text"
               />
-              {errors.title && (
-                <FormErrorMessage>{errors.title.message}</FormErrorMessage>
+              {errors.item_name && (
+                <FormErrorMessage>{errors.item_name.message}</FormErrorMessage>
               )}
             </FormControl>
+
             <FormControl mt={4}>
-              <FormLabel htmlFor="description">Description</FormLabel>
+              <FormLabel htmlFor="item_img_url">Item Image URL</FormLabel>
               <Input
-                id="description"
-                {...register("description")}
-                placeholder="Description"
+                id="item_img_url"
+                {...register("item_img_url")}
+                placeholder="Item Image URL"
+                type="text"
+              />
+            </FormControl>
+
+            <FormControl mt={4}>
+              <FormLabel htmlFor="item_vendor">Item Vendor</FormLabel>
+              <Input
+                id="item_vendor"
+                {...register("item_vendor")}
+                placeholder="Item Vendor"
+                type="text"
+              />
+            </FormControl>
+
+            <FormControl mt={4}>
+              <FormLabel htmlFor="item_params">Item Parameters</FormLabel>
+              <Input
+                id="item_params"
+                {...register("item_params")}
+                placeholder="Item Parameters"
                 type="text"
               />
             </FormControl>

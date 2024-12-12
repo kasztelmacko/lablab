@@ -113,7 +113,6 @@ class Item(ItemBase, table=True):
 # Properties to return via API, id is always required
 class ItemPublic(ItemBase):
     item_id: uuid.UUID
-    owner_id: uuid.UUID
 
 
 class ItemsPublic(SQLModel):

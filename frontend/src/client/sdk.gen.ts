@@ -35,8 +35,8 @@ import type {
   UsersRegisterUserResponse,
   UsersReadUserByIdData,
   UsersReadUserByIdResponse,
-  UsersUpdateUserData,
-  UsersUpdateUserResponse,
+  UsersUpdateUserPermissionData,
+  UsersUpdateUserPermissionResponse,
   UsersDeleteUserData,
   UsersDeleteUserResponse,
   UtilsTestEmailData,
@@ -455,11 +455,11 @@ export class UsersService {
    * @throws ApiError
    */
   public static updateUser(
-    data: UsersUpdateUserData,
-  ): CancelablePromise<UsersUpdateUserResponse> {
+    data: UsersUpdateUserPermissionData,
+  ): CancelablePromise<UsersUpdateUserPermissionResponse> {
     return __request(OpenAPI, {
       method: "PATCH",
-      url: "/api/v1/users/{user_id}",
+      url: "/api/v1/users/{user_id}/permissions",
       path: {
         user_id: data.user_id,
       },

@@ -36,8 +36,16 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
     mode: "onBlur",
     criteriaMode: "all",
     defaultValues: {
-      title: "",
-      description: "",
+      item_name: "",
+      current_room: "",
+      item_img_url: "",
+      item_vendor: "",
+      item_params: "",
+      is_available: true,
+      table_name: null,
+      system_name: null,
+      current_owner_id: null,
+      taken_at: null,
     },
   })
 
@@ -74,26 +82,57 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
           <ModalHeader>Add Item</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
-            <FormControl isRequired isInvalid={!!errors.title}>
-              <FormLabel htmlFor="title">Title</FormLabel>
+            <FormControl isRequired isInvalid={!!errors.item_name}>
+              <FormLabel htmlFor="item_name">Item Name</FormLabel>
               <Input
-                id="title"
-                {...register("title", {
-                  required: "Title is required.",
+                id="item_name"
+                {...register("item_name", {
+                  required: "Item name is required.",
                 })}
-                placeholder="Title"
+                placeholder="Item Name"
                 type="text"
               />
-              {errors.title && (
-                <FormErrorMessage>{errors.title.message}</FormErrorMessage>
+              {errors.item_name && (
+                <FormErrorMessage>{errors.item_name.message}</FormErrorMessage>
               )}
             </FormControl>
+
             <FormControl mt={4}>
-              <FormLabel htmlFor="description">Description</FormLabel>
+              <FormLabel htmlFor="current_room">Current Room</FormLabel>
               <Input
-                id="description"
-                {...register("description")}
-                placeholder="Description"
+                id="current_room"
+                {...register("current_room")}
+                placeholder="Current Room"
+                type="text"
+              />
+            </FormControl>
+
+            <FormControl mt={4}>
+              <FormLabel htmlFor="item_img_url">Item Image URL</FormLabel>
+              <Input
+                id="item_img_url"
+                {...register("item_img_url")}
+                placeholder="Item Image URL"
+                type="text"
+              />
+            </FormControl>
+
+            <FormControl mt={4}>
+              <FormLabel htmlFor="item_vendor">Item Vendor</FormLabel>
+              <Input
+                id="item_vendor"
+                {...register("item_vendor")}
+                placeholder="Item Vendor"
+                type="text"
+              />
+            </FormControl>
+
+            <FormControl mt={4}>
+              <FormLabel htmlFor="item_params">Item Parameters</FormLabel>
+              <Input
+                id="item_params"
+                {...register("item_params")}
+                placeholder="Item Parameters"
                 type="text"
               />
             </FormControl>

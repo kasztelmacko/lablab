@@ -15,7 +15,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useEffect } from "react"
 import { z } from "zod"
 
-import { ItemsService } from "../../client"
+import { type ItemPublic, type UserPublic, ItemsService } from "../../client"
 import ActionsMenu from "../../components/Common/ActionsMenu"
 import Navbar from "../../components/Common/Navbar"
 import AddItem from "../../components/Items/AddItem"
@@ -25,9 +25,11 @@ const itemsSearchSchema = z.object({
   page: z.number().catch(1),
 })
 
+type itemsSearchParams = z.infer<typeof itemsSearchSchema>
+
 export const Route = createFileRoute("/_layout/items")({
   component: Items,
-  validateSearch: (search) => itemsSearchSchema.parse(search),
+  validateSearch: (search: itemsSearchParams) => itemsSearchSchema.parse(search),
 })
 
 const PER_PAGE = 5
@@ -42,18 +44,24 @@ function getItemsQueryOptions({ page }: { page: number }) {
 
 function ItemsTable() {
   const queryClient = useQueryClient()
+  const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
   const { page } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
   const setPage = (page: number) =>
     navigate({ search: (prev: {[key: string]: string}) => ({ ...prev, page }) })
 
+  // Define the expected shape of the query data
+  type ItemsQueryData = {
+    data: ItemPublic[]
+  }
+
   const {
     data: items,
     isPending,
     isPlaceholderData,
-  } = useQuery({
+  } = useQuery<ItemsQueryData>({
     ...getItemsQueryOptions({ page }),
-    placeholderData: (prevData) => prevData,
+    placeholderData: (prevData: ItemsQueryData | undefined) => prevData, // Explicitly type prevData
   })
 
   const hasNextPage = !isPlaceholderData && items?.data.length === PER_PAGE
@@ -65,22 +73,32 @@ function ItemsTable() {
     }
   }, [page, queryClient, hasNextPage])
 
+  // Check if the current user has permission to edit items
+  const canEditItems = currentUser?.is_superuser || currentUser?.can_edit_items
+
   return (
     <>
       <TableContainer>
         <Table size={{ base: "sm", md: "md" }}>
           <Thead>
             <Tr>
-              <Th>ID</Th>
-              <Th>Title</Th>
-              <Th>Description</Th>
+              <Th>Item Name</Th>
+              <Th>Current Room</Th>
+              <Th>Table Name</Th>
+              <Th>System Name</Th>
+              <Th>Current Owner ID</Th>
+              <Th>Taken At</Th>
+              <Th>Item Image URL</Th>
+              <Th>Item Vendor</Th>
+              <Th>Item Parameters</Th>
+              <Th>Is Available</Th>
               <Th>Actions</Th>
             </Tr>
           </Thead>
           {isPending ? (
             <Tbody>
               <Tr>
-                {new Array(4).fill(null).map((_, index) => (
+                {new Array(11).fill(null).map((_, index) => (
                   <Td key={index}>
                     <SkeletonText noOfLines={1} paddingBlock="16px" />
                   </Td>
@@ -89,21 +107,24 @@ function ItemsTable() {
             </Tbody>
           ) : (
             <Tbody>
-              {items?.data.map((item) => (
-                <Tr key={item.id} opacity={isPlaceholderData ? 0.5 : 1}>
-                  <Td>{item.id}</Td>
-                  <Td isTruncated maxWidth="150px">
-                    {item.title}
-                  </Td>
-                  <Td
-                    color={!item.description ? "ui.dim" : "inherit"}
-                    isTruncated
-                    maxWidth="150px"
-                  >
-                    {item.description || "N/A"}
-                  </Td>
+              {items?.data.map((item: ItemPublic) => (
+                <Tr key={item.item_id} opacity={isPlaceholderData ? 0.5 : 1}>
+                  <Td>{item.item_name}</Td>
+                  <Td>{item.current_room || "N/A"}</Td>
+                  <Td>{item.table_name || "N/A"}</Td>
+                  <Td>{item.system_name || "N/A"}</Td>
+                  <Td>{item.current_owner_id || "N/A"}</Td>
+                  <Td>{item.taken_at || "N/A"}</Td>
+                  <Td>{item.item_img_url || "N/A"}</Td>
+                  <Td>{item.item_vendor || "N/A"}</Td>
+                  <Td>{item.item_params || "N/A"}</Td>
+                  <Td>{item.is_available ? "Yes" : "No"}</Td>
                   <Td>
-                    <ActionsMenu type={"Item"} value={item} />
+                    {canEditItems ? (
+                      <ActionsMenu type={"Item"} value={item} />
+                    ) : (
+                      []
+                    )}
                   </Td>
                 </Tr>
               ))}

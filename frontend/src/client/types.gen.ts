@@ -38,7 +38,6 @@ export type ItemPublic = {
   item_vendor?: string | null
   item_params?: string | null
   is_available?: boolean
-  owner_id: string
 }
 
 export type ItemsPublic = {
@@ -304,12 +303,12 @@ export type UsersReadUserByIdData = {
 
 export type UsersReadUserByIdResponse = UserPublic
 
-export type UsersUpdateUserData = {
-  requestBody: UserUpdate
+export type UsersUpdateUserPermissionData = {
+  requestBody: UserPermissionsUpdate
   user_id: string
 }
 
-export type UsersUpdateUserResponse = UserPublic
+export type UsersUpdateUserPermissionResponse = UserPublic
 
 export type UsersDeleteUserData = {
   user_id: string

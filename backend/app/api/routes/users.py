@@ -147,7 +147,7 @@ def read_user_by_id(
         )
     return user
 
-@router.put("/{user_id}/permissions", response_model=UserPublic)
+@router.patch("/{user_id}/permissions", response_model=UserPublic)
 def update_user_permissions(
     *,
     session: SessionDep,
@@ -194,8 +194,4 @@ def delete_user(
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
-    statement = delete(Item).where(col(Item.owner_id) == user_id)
-    session.exec(statement)  # type: ignore
-    session.delete(user)
-    session.commit()
     return Message(message="User deleted successfully")

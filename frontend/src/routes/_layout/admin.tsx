@@ -19,18 +19,18 @@ import { useEffect } from "react"
 import { z } from "zod"
 
 import { type UserPublic, UsersService } from "../../client"
-import AddUser from "../../components/Admin/AddUser"
 import ActionsMenu from "../../components/Common/ActionsMenu"
-import Navbar from "../../components/Common/Navbar"
 import { PaginationFooter } from "../../components/Common/PaginationFooter.tsx"
 
 const usersSearchSchema = z.object({
   page: z.number().catch(1),
 })
 
+type UsersSearchParams = z.infer<typeof usersSearchSchema>
+
 export const Route = createFileRoute("/_layout/admin")({
   component: Admin,
-  validateSearch: (search) => usersSearchSchema.parse(search),
+  validateSearch: (search: UsersSearchParams) => usersSearchSchema.parse(search),
 })
 
 const PER_PAGE = 5
@@ -51,13 +51,18 @@ function UsersTable() {
   const setPage = (page: number) =>
     navigate({ search: (prev: {[key: string]: string}) => ({ ...prev, page }) })
 
+  type UsersQueryData = {
+    data: UserPublic[]
+    count: number
+  }
+
   const {
     data: users,
     isPending,
     isPlaceholderData,
   } = useQuery({
     ...getUsersQueryOptions({ page }),
-    placeholderData: (prevData) => prevData,
+    placeholderData: (prevData: UsersQueryData | undefined) => prevData,
   })
 
   const hasNextPage = !isPlaceholderData && users?.data.length === PER_PAGE
@@ -68,6 +73,9 @@ function UsersTable() {
       queryClient.prefetchQuery(getUsersQueryOptions({ page: page + 1 }))
     }
   }, [page, queryClient, hasNextPage])
+
+  // Check if the current user has permission to edit users
+  const canEditUsers = currentUser?.is_superuser || currentUser?.can_edit_users
 
   return (
     <>
@@ -94,15 +102,15 @@ function UsersTable() {
             </Tbody>
           ) : (
             <Tbody>
-              {users?.data.map((user) => (
-                <Tr key={user.id}>
+              {users?.data.map((user: UserPublic) => (
+                <Tr key={user.user_id}>
                   <Td
                     color={!user.full_name ? "ui.dim" : "inherit"}
                     isTruncated
                     maxWidth="150px"
                   >
                     {user.full_name || "N/A"}
-                    {currentUser?.id === user.id && (
+                    {currentUser?.user_id === user.user_id && (
                       <Badge ml="1" colorScheme="teal">
                         You
                       </Badge>
@@ -125,11 +133,15 @@ function UsersTable() {
                     </Flex>
                   </Td>
                   <Td>
-                    <ActionsMenu
-                      type="User"
-                      value={user}
-                      disabled={currentUser?.id === user.id}
-                    />
+                    {canEditUsers ? (
+                      <ActionsMenu
+                        type="User"
+                        value={user}
+                        disabled={currentUser?.user_id === user.user_id}
+                      />
+                    ) : (
+                      <Badge colorScheme="gray">No Actions</Badge>
+                    )}
                   </Td>
                 </Tr>
               ))}
@@ -153,8 +165,6 @@ function Admin() {
       <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
         Users Management
       </Heading>
-
-      <Navbar type={"User"} addModalAs={AddUser} />
       <UsersTable />
     </Container>
   )

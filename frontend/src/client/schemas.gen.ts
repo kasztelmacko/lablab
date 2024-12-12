@@ -300,14 +300,9 @@ export const ItemPublicSchema = {
       title: "Is Available",
       default: true,
     },
-    owner_id: {
-      type: "string",
-      format: "uuid",
-      title: "Owner Id",
-    },
   },
   type: "object",
-  required: ["item_id", "item_name", "owner_id"],
+  required: ["item_id", "item_name", "current_room", "item_img_url", "item_vendor", "item_params"],
   title: "ItemPublic",
 } as const;
 

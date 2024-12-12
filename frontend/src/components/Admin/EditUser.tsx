@@ -3,9 +3,6 @@ import {
   Checkbox,
   Flex,
   FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -15,16 +12,15 @@ import {
   ModalOverlay,
 } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { type SubmitHandler, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 
 import {
   type ApiError,
   type UserPublic,
-  type UserUpdate,
   UsersService,
 } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
-import { emailPattern, handleError } from "../../utils"
+import { handleError } from "../../utils"
 
 interface EditUserProps {
   user: UserPublic
@@ -32,8 +28,11 @@ interface EditUserProps {
   onClose: () => void
 }
 
-interface UserUpdateForm extends UserUpdate {
-  confirm_password: string
+interface UserPermissionsForm {
+  is_part_of_lab?: boolean | null
+  can_edit_items?: boolean | null
+  can_edit_labs?: boolean | null
+  can_edit_users?: boolean | null
 }
 
 const EditUser = ({ user, isOpen, onClose }: EditUserProps) => {
@@ -44,19 +43,25 @@ const EditUser = ({ user, isOpen, onClose }: EditUserProps) => {
     register,
     handleSubmit,
     reset,
-    getValues,
-    formState: { errors, isSubmitting, isDirty },
-  } = useForm<UserUpdateForm>({
+    formState: { isSubmitting, isDirty },
+  } = useForm<UserPermissionsForm>({
     mode: "onBlur",
-    criteriaMode: "all",
-    defaultValues: user,
+    defaultValues: {
+      is_part_of_lab: user.is_part_of_lab || false,
+      can_edit_items: user.can_edit_items || false,
+      can_edit_labs: user.can_edit_labs || false,
+      can_edit_users: user.can_edit_users || false,
+    },
   })
 
   const mutation = useMutation({
-    mutationFn: (data: UserUpdateForm) =>
-      UsersService.updateUser({ userId: user.id, requestBody: data }),
+    mutationFn: (data: UserPermissionsForm) =>
+      UsersService.updateUser({
+        user_id: user.user_id,
+        requestBody: data,
+      }),
     onSuccess: () => {
-      showToast("Success!", "User updated successfully.", "success")
+      showToast("Success!", "User permissions updated successfully.", "success")
       onClose()
     },
     onError: (err: ApiError) => {
@@ -67,12 +72,9 @@ const EditUser = ({ user, isOpen, onClose }: EditUserProps) => {
     },
   })
 
-  const onSubmit: SubmitHandler<UserUpdateForm> = async (data) => {
-    if (data.password === "") {
-      data.password = undefined
-    }
+  const onSubmit = handleSubmit((data: UserPermissionsForm) => {
     mutation.mutate(data)
-  }
+  })
 
   const onCancel = () => {
     reset()
@@ -88,73 +90,29 @@ const EditUser = ({ user, isOpen, onClose }: EditUserProps) => {
         isCentered
       >
         <ModalOverlay />
-        <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
-          <ModalHeader>Edit User</ModalHeader>
+        <ModalContent as="form" onSubmit={onSubmit}>
+          <ModalHeader>Edit User Permissions</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
-            <FormControl isInvalid={!!errors.email}>
-              <FormLabel htmlFor="email">Email</FormLabel>
-              <Input
-                id="email"
-                {...register("email", {
-                  required: "Email is required",
-                  pattern: emailPattern,
-                })}
-                placeholder="Email"
-                type="email"
-              />
-              {errors.email && (
-                <FormErrorMessage>{errors.email.message}</FormErrorMessage>
-              )}
-            </FormControl>
-            <FormControl mt={4}>
-              <FormLabel htmlFor="name">Full name</FormLabel>
-              <Input id="name" {...register("full_name")} type="text" />
-            </FormControl>
-            <FormControl mt={4} isInvalid={!!errors.password}>
-              <FormLabel htmlFor="password">Set Password</FormLabel>
-              <Input
-                id="password"
-                {...register("password", {
-                  minLength: {
-                    value: 8,
-                    message: "Password must be at least 8 characters",
-                  },
-                })}
-                placeholder="Password"
-                type="password"
-              />
-              {errors.password && (
-                <FormErrorMessage>{errors.password.message}</FormErrorMessage>
-              )}
-            </FormControl>
-            <FormControl mt={4} isInvalid={!!errors.confirm_password}>
-              <FormLabel htmlFor="confirm_password">Confirm Password</FormLabel>
-              <Input
-                id="confirm_password"
-                {...register("confirm_password", {
-                  validate: (value) =>
-                    value === getValues().password ||
-                    "The passwords do not match",
-                })}
-                placeholder="Password"
-                type="password"
-              />
-              {errors.confirm_password && (
-                <FormErrorMessage>
-                  {errors.confirm_password.message}
-                </FormErrorMessage>
-              )}
-            </FormControl>
-            <Flex>
-              <FormControl mt={4}>
-                <Checkbox {...register("is_superuser")} colorScheme="teal">
-                  Is superuser?
+            <Flex direction={{ base: "column", md: "row" }} gap={4}>
+              <FormControl>
+                <Checkbox {...register("is_part_of_lab")} colorScheme="teal">
+                  Is part of lab?
                 </Checkbox>
               </FormControl>
-              <FormControl mt={4}>
-                <Checkbox {...register("is_active")} colorScheme="teal">
-                  Is active?
+              <FormControl>
+                <Checkbox {...register("can_edit_items")} colorScheme="teal">
+                  Can edit items?
+                </Checkbox>
+              </FormControl>
+              <FormControl>
+                <Checkbox {...register("can_edit_labs")} colorScheme="teal">
+                  Can edit labs?
+                </Checkbox>
+              </FormControl>
+              <FormControl>
+                <Checkbox {...register("can_edit_users")} colorScheme="teal">
+                  Can edit users?
                 </Checkbox>
               </FormControl>
             </Flex>

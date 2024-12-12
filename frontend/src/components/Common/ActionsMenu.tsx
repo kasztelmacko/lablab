@@ -24,6 +24,15 @@ const ActionsMenu = ({ type, value, disabled }: ActionsMenuProps) => {
   const editUserModal = useDisclosure()
   const deleteModal = useDisclosure()
 
+  const isItemPublic = (value: ItemPublic | UserPublic): value is ItemPublic => {
+    return "item_id" in value
+  }
+
+  // Get the correct ID based on the type
+  const getId = (value: ItemPublic | UserPublic): string => {
+    return isItemPublic(value) ? value.item_id : value.user_id
+  }
+
   return (
     <>
       <Menu>
@@ -63,7 +72,7 @@ const ActionsMenu = ({ type, value, disabled }: ActionsMenuProps) => {
         )}
         <Delete
           type={type}
-          id={value.id}
+          id={getId(value)}
           isOpen={deleteModal.isOpen}
           onClose={deleteModal.onClose}
         />
