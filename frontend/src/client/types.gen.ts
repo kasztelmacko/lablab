@@ -195,6 +195,12 @@ export type ItemTakeItemData = {
   requestBody: ItemTake
 }
 
+export type ItemReleaseItemResponse = ItemPublic
+
+export type ItemReleaseItemData = {
+  item_id: string
+}
+
 export type ItemsUpdateItemResponse = ItemPublic
 
 export type ItemsDeleteItemData = {

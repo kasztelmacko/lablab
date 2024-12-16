@@ -133,6 +133,10 @@ function ItemsGrid() {
 function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: boolean }) {
   const { isOpen: isDetailsOpen, onOpen: onDetailsOpen, onClose: onDetailsClose } = useDisclosure();
   const { isOpen: isTakeItemOpen, onOpen: onTakeItemOpen, onClose: onTakeItemClose } = useDisclosure();
+  const { isOpen: isReleaseItemOpen, onOpen: onReleaseItemOpen, onClose: onReleaseItemClose } = useDisclosure();
+
+  const queryClient = useQueryClient();
+  const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"]);
 
   // Fetch room details
   const { data: room } = useQuery<RoomPublic>({
@@ -147,6 +151,20 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
     queryFn: () => UsersService.readUserById({ user_id: item.current_owner_id! }),
     enabled: !!item.current_owner_id,
   });
+
+  const handleReleaseItem = async () => {
+    try {
+      await ItemsService.releaseItem({ item_id: item.item_id });
+  
+      queryClient.invalidateQueries({ queryKey: ["items"] });
+  
+      onReleaseItemClose();
+    } catch (error) {
+      console.error("Error releasing item:", error);
+    }
+  };
+
+  const isCurrentUserOwner = currentUser?.user_id === item.current_owner_id;
 
   return (
     <Box
@@ -249,6 +267,11 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
             </Flex>
           </ModalBody>
           <ModalFooter>
+            {isCurrentUserOwner && (
+              <Button onClick={onReleaseItemOpen} mr={3}>
+                Release Item
+              </Button>
+            )}
             <Button onClick={onTakeItemOpen}>Take Item</Button>
           </ModalFooter>
         </ModalContent>
@@ -256,6 +279,23 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
 
       {/* TakeItem Modal */}
       <TakeItem item={item} isOpen={isTakeItemOpen} onClose={onTakeItemClose} />
+
+      {/* ReleaseItem Modal */}
+      <Modal isOpen={isReleaseItemOpen} onClose={onReleaseItemClose} size="md">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text>Are you sure you want to release this item?</Text>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={handleReleaseItem}>
+              Confirm
+            </Button>
+            <Button onClick={onReleaseItemClose}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 }

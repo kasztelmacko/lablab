@@ -49,7 +49,8 @@ import type {
   RoomsCreateRoomResponse,
   RoomsDeleteRoomResponse,
   RoomsUpdateRoomResponse,
-  RoomsUpdateRoomData
+  RoomsUpdateRoomData,
+  ItemReleaseItemResponse,
 } from "./types.gen"
 
 export class ItemsService {
@@ -197,7 +198,34 @@ export class ItemsService {
       },
     });
   }
+
+  /**
+ * Release Item
+ * Release an item. Only users who are part of the lab and are current owner can Release an item.
+ * @param data The data for the request.
+ * @param data.item_id
+ * @param data.requestBody
+ * @returns ItemPublic Successful Response
+ * @throws ApiError
+ */
+  public static releaseItem(
+    data: { item_id: string },
+  ): CancelablePromise<ItemReleaseItemResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/items/{item_id}/release",
+      path: {
+        item_id: data.item_id,
+      },
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    });
+  }
 }
+
+
 
 export class LoginService {
   /**

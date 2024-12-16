@@ -132,6 +132,44 @@ def take_item(
     session.refresh(item)
     return item
 
+@router.put("/{item_id}/release", response_model=ItemPublic)
+def release_item(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    item_id: uuid.UUID,
+) -> Any:
+    """
+    Release an item. Only users who are part of the lab and are the current owner can release an item.
+    """
+    item = session.get(Item, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    # Check if the user is part of the lab
+    if not current_user.is_part_of_lab:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have sufficient permissions to release this item.",
+        )
+
+    # Check if the current user is the owner of the item
+    if item.current_owner_id != current_user.user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="You are not the current owner of this item.",
+        )
+
+    # Update the item's fields to release it
+    item.current_owner_id = None
+    item.is_available = True
+    item.taken_at = None
+
+    session.add(item)
+    session.commit()
+    session.refresh(item)
+    return item
+
 @router.delete("/{item_id}")
 def delete_item(
     session: SessionDep, current_user: CurrentUser, item_id: uuid.UUID
