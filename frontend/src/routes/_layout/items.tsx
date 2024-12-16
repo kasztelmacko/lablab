@@ -14,6 +14,11 @@ import {
   ModalBody,
   ModalCloseButton,
   useDisclosure,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
 } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -196,13 +201,13 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
 
           <Flex justifyContent="center" alignItems="center" mb={2}>
             <Text color="gray.600">
-              <strong>Vendor:</strong> {item.item_vendor || "N/A"}
+              <strong>Vendor:</strong> {item.item_vendor || ""}
             </Text>
           </Flex>
 
           <Flex justifyContent="center" alignItems="center" mb={2}>
             <Text color="gray.600">
-              <strong>Parameters:</strong> {item.item_params || "N/A"}
+              <strong>Parameters:</strong> {item.item_params || ""}
             </Text>
           </Flex>
 
@@ -227,43 +232,67 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
           <ModalCloseButton />
           <ModalBody>
             <Flex direction="column" gap={4}>
-              {/* Section: Item Details */}
-              <Box>
-                <Heading size="md" mb={2}>
-                  Item Details
-                </Heading>
-                <Text>
-                  <strong>Item Name:</strong> {item.item_name || "N/A"}
-                </Text>
-                <Text>
-                  <strong>Vendor:</strong> {item.item_vendor || "N/A"}
-                </Text>
-                <Text>
-                  <strong>Parameters:</strong> {item.item_params || "N/A"}
-                </Text>
-              </Box>
-
-              {/* Section: Item Place */}
-              <Box>
-                <Heading size="md" mb={2}>
-                  Item Place
-                </Heading>
-                <Text>
-                  <strong>Current Room:</strong> {room?.room_number || "N/A"}
-                </Text>
-                <Text>
-                  <strong>Table Name:</strong> {item.table_name || "N/A"}
-                </Text>
-                <Text>
-                  <strong>System Name:</strong> {item.system_name || "N/A"}
-                </Text>
+              {/* Item Name as Heading */}
+              <Heading size="lg" textAlign="center" mb={4}>
+                {item.item_name || "N/A"}
+              </Heading>
+              {/* Separate Box for Each Item Place */}
+              <Box borderWidth="1px" borderRadius="lg" p={4} bg="gray.50">
                 <Text>
                   <strong>Current Owner:</strong> {user?.full_name || "N/A"}
                 </Text>
+              </Box>
+              <Box borderWidth="1px" borderRadius="lg" p={4} bg="gray.50">
                 <Text>
-                  <strong>Taken At:</strong> {item.taken_at || "N/A"}
+                  <strong>Taken At:</strong>{" "}
+                  {item.taken_at
+                    ? new Date(item.taken_at).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })
+                    : "N/A"}
                 </Text>
               </Box>
+              <Box borderWidth="1px" borderRadius="lg" p={4} bg="gray.50">
+                <Text>
+                  <strong>Current Room:</strong> {room?.room_number || "N/A"}
+                </Text>
+              </Box>
+
+              <Box borderWidth="1px" borderRadius="lg" p={4} bg="gray.50">
+                <Text>
+                  <strong>Table Name:</strong> {item.table_name || "N/A"}
+                </Text>
+              </Box>
+
+              <Box borderWidth="1px" borderRadius="lg" p={4} bg="gray.50">
+                <Text>
+                  <strong>System Name:</strong> {item.system_name || "N/A"}
+                </Text>
+              </Box>
+
+              {/* Section: Item Details in Accordion */}
+              <Accordion allowToggle>
+                <AccordionItem>
+                  <h2>
+                    <AccordionButton>
+                      <Box flex="1" textAlign="left">
+                        <Heading size="md">Item Details</Heading>
+                      </Box>
+                      <AccordionIcon />
+                    </AccordionButton>
+                  </h2>
+                  <AccordionPanel pb={4}>
+                    <Text>
+                      <strong>Vendor:</strong> {item.item_vendor || "N/A"}
+                    </Text>
+                    <Text>
+                      <strong>Parameters:</strong> {item.item_params || "N/A"}
+                    </Text>
+                  </AccordionPanel>
+                </AccordionItem>
+              </Accordion>
             </Flex>
           </ModalBody>
           <ModalFooter>
@@ -289,7 +318,7 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
             <Text>Are you sure you want to release this item?</Text>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleReleaseItem}>
+            <Button mr={3} onClick={handleReleaseItem}>
               Confirm
             </Button>
             <Button onClick={onReleaseItemClose}>Cancel</Button>
