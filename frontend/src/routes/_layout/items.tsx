@@ -22,7 +22,7 @@ import {
 } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 
 import {
@@ -37,6 +37,8 @@ import ActionsMenu from "../../components/Common/ActionsMenu";
 import Navbar from "../../components/Common/Navbar";
 import AddItem from "../../components/Items/AddItem";
 import TakeItem from "../../components/Items/TakeItem";
+import BoolFilterComponent from "../../components/Common/Filters/FilterBOOL.tsx";
+import UUIDFilterComponent from "../../components/Common/Filters/FilterUUID.tsx";
 import { PaginationFooter } from "../../components/Common/PaginationFooter.tsx";
 
 const itemsSearchSchema = z.object({
@@ -60,7 +62,13 @@ function getItemsQueryOptions({ page }: { page: number }) {
   };
 }
 
-function ItemsGrid() {
+function ItemsGrid({
+  itemFilters,
+  roomFilters,
+}: {
+  itemFilters: { [key: string]: boolean | null };
+  roomFilters: { [key: string]: string | null };
+}) {
   const queryClient = useQueryClient();
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"]);
   const { page } = Route.useSearch();
@@ -70,6 +78,7 @@ function ItemsGrid() {
 
   type ItemsQueryData = {
     data: ItemPublic[];
+    count: number;
   };
 
   const {
@@ -92,20 +101,26 @@ function ItemsGrid() {
 
   const canEditItems = currentUser?.is_superuser || currentUser?.can_edit_items || false;
 
+  const filteredItems = items?.data.filter((item: ItemPublic) => {
+    // Filter by availability
+    if (itemFilters.is_available !== null && item.is_available !== itemFilters.is_available) {
+      return false;
+    }
+    // Filter by current room (if room filter is applied)
+    if (roomFilters.room_id !== null && item.current_room !== roomFilters.room_id) {
+      return false;
+    }
+    return true;
+  });
+
   return (
     <>
-      <Flex
-        flexWrap="wrap"
-        gap={6}
-        justifyContent="center"
-        alignItems="stretch"
-        mt={6}
-      >
+      <Flex gap={6} justifyContent="center" alignItems="stretch" mt={6}>
         {isPending ? (
           new Array(5).fill(null).map((_, index) => (
             <Box
               key={index}
-              w={{ base: "100%", md: "48%", lg: "31%", xl: "18%" }}
+              w={{ base: "48%", md: "48%", lg: "31%", xl: "18%" }}
               p={4}
               borderWidth="1px"
               borderRadius="lg"
@@ -120,7 +135,7 @@ function ItemsGrid() {
             </Box>
           ))
         ) : (
-          items?.data.map((item: ItemPublic) => (
+          filteredItems?.map((item: ItemPublic) => (
             <ItemCard key={item.item_id} item={item} canEditItems={canEditItems} />
           ))
         )}
@@ -160,9 +175,9 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
   const handleReleaseItem = async () => {
     try {
       await ItemsService.releaseItem({ item_id: item.item_id });
-  
+
       queryClient.invalidateQueries({ queryKey: ["items"] });
-  
+
       onReleaseItemClose();
     } catch (error) {
       console.error("Error releasing item:", error);
@@ -173,7 +188,7 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
 
   return (
     <Box
-      w={{ base: "100%", md: "48%", lg: "31%", xl: "18%" }}
+      w={{ base: "48%", md: "48%", lg: "31%", xl: "18%" }}
       p={4}
       borderRadius="lg"
       boxShadow="md"
@@ -201,15 +216,19 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
 
           <Flex justifyContent="center" alignItems="center" mb={2}>
             <Text color="gray.600">
-              <strong>Vendor:</strong> {item.item_vendor || ""}
+              <strong>Current Room:</strong> 
+              <div>{room?.room_number || ""}</div>
             </Text>
           </Flex>
 
+          {item.current_owner_id && (
           <Flex justifyContent="center" alignItems="center" mb={2}>
             <Text color="gray.600">
-              <strong>Parameters:</strong> {item.item_params || ""}
+              <strong>Current Owner:</strong>
+              <div>{user?.full_name || ""}</div>
             </Text>
           </Flex>
+          )}
 
           {/* Button to open the modal */}
           <Button onClick={onDetailsOpen} mt={4}>
@@ -256,7 +275,8 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
               </Box>
               <Box borderWidth="1px" borderRadius="lg" p={4} bg="gray.50">
                 <Text>
-                  <strong>Current Room:</strong> {room?.room_number || "N/A"}
+                  <strong>Current Room:</strong> 
+                  {room?.room_number || "N/A"}
                 </Text>
               </Box>
 
@@ -330,14 +350,47 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
 }
 
 function Items() {
+  const [itemFilters, setItemFilters] = useState<{ [key: string]: boolean | null }>({
+    is_available: null,
+  });
+
+  const [roomFilters, setRoomFilters] = useState<{ [key: string]: string | null }>({
+    room_id: null,
+  });
+
+  const handleItemFilterChange = (filterKey: string, filterValue: boolean | null) => {
+    if (filterKey === "all") {
+      setItemFilters({ is_available: null });
+    } else {
+      setItemFilters((prevFilters) => ({
+        ...prevFilters,
+        [filterKey]: filterValue,
+      }));
+    }
+  };
+
+  const handleRoomFilterChange = (filterKey: string, filterValue: string | null) => {
+    if (filterKey === "all") {
+      setRoomFilters({ room_id: null });
+    } else {
+      setRoomFilters((prevFilters) => ({
+        ...prevFilters,
+        [filterKey]: filterValue,
+      }));
+    }
+  };
+
   return (
     <Container maxW="full">
       <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
         Items Management
       </Heading>
-
+      <Flex gap={4} mb={4} mt={6}>
+        <BoolFilterComponent type="Item" onFilterChange={handleItemFilterChange} />
+        <UUIDFilterComponent type="Room" onFilterChange={handleRoomFilterChange} />
+      </Flex>
       <Navbar type={"Item"} addModalAs={AddItem} />
-      <ItemsGrid />
+      <ItemsGrid itemFilters={itemFilters} roomFilters={roomFilters} />
     </Container>
   );
 }

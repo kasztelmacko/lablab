@@ -15,7 +15,7 @@ import { z } from "zod";
 
 import { type UserPublic, UsersService } from "../../client";
 import ActionsMenu from "../../components/Common/ActionsMenu";
-import FilterComponent from "../../components/Common/Filter.tsx";
+import BoolFilterComponent from "../../components/Common/Filters/FilterBOOL.tsx";
 import { PaginationFooter } from "../../components/Common/PaginationFooter.tsx";
 
 const usersSearchSchema = z.object({
@@ -39,7 +39,7 @@ function getUsersQueryOptions({ page }: { page: number }) {
   };
 }
 
-function UsersGrid({ filters }: { filters: { [key: string]: boolean | null } }) {
+function UsersGrid({ filters }: { filters: { is_part_of_lab: boolean | null } }) {
   const queryClient = useQueryClient();
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"]);
   const { page } = Route.useSearch();
@@ -75,7 +75,7 @@ function UsersGrid({ filters }: { filters: { [key: string]: boolean | null } }) 
   // Apply filters to users
   const filteredUsers = users?.data.filter((user: UserPublic) => {
     if (filters.is_part_of_lab === null) {
-      return true; // Show all users if "All" is selected
+      return true; // No filter applied
     }
     return user.is_part_of_lab === filters.is_part_of_lab;
   });
@@ -164,18 +164,15 @@ function UsersGrid({ filters }: { filters: { [key: string]: boolean | null } }) 
 }
 
 function Admin() {
-  const [filters, setFilters] = useState<{ [key: string]: boolean | null }>({
+  const [filters, setFilters] = useState<{ is_part_of_lab: boolean | null }>({
     is_part_of_lab: null,
   });
 
-  const handleFilterChange = (filterKey: string, filterValue: boolean | null) => {
+  const handleFilterChange = (filterKey: string, filterValue: string | boolean | null) => {
     if (filterKey === "all") {
       setFilters({ is_part_of_lab: null });
-    } else {
-      setFilters((prevFilters: { [key: string]: boolean | null }) => ({
-        ...prevFilters,
-        [filterKey]: filterValue,
-      }));
+    } else if (filterKey === "is_part_of_lab" && (filterValue === null || typeof filterValue === "boolean")) {
+      setFilters({ is_part_of_lab: filterValue });
     }
   };
 
@@ -185,7 +182,9 @@ function Admin() {
         <Heading size="lg" textAlign={{ base: "center", md: "left" }}>
           Users Management
         </Heading>
-        <FilterComponent type="User" onFilterChange={handleFilterChange} />
+        <Flex gap={4} mb={4} mt={6}>
+          <BoolFilterComponent type="User" onFilterChange={handleFilterChange} />
+        </Flex>
       </Flex>
       <UsersGrid filters={filters} />
     </Container>
