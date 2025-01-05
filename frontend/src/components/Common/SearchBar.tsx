@@ -19,7 +19,7 @@ const SearchBar = ({ placeholder, onSearch, debounceDelay = 300 }: SearchBarProp
   }, [searchTerm, debounceDelay, onSearch]);
 
   return (
-    <Flex w="100%" maxW="300px">
+    <Flex w="100%" maxW="612px">
       <Input
         placeholder={placeholder}
         value={searchTerm}

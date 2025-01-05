@@ -124,12 +124,17 @@ function ItemsGrid({
 
   return (
     <>
-      <Flex gap={6} justifyContent="center" alignItems="stretch" mt={6}>
+      <Flex
+        gap={6}
+        mt={6}
+        justifyContent="left"
+        flexDirection="row"
+      >
         {isPending ? (
           new Array(5).fill(null).map((_, index) => (
             <Box
               key={index}
-              w={{ base: "48%", md: "48%", lg: "31%", xl: "18%" }}
+              width="300px"
               p={4}
               borderWidth="1px"
               borderRadius="lg"
@@ -198,16 +203,16 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
   const isCurrentUserOwner = currentUser?.user_id === item.current_owner_id;
 
   return (
-    <Box
-      w={{ base: "48%", md: "48%", lg: "31%", xl: "18%" }}
-      p={4}
-      borderRadius="lg"
-      boxShadow="md"
-      bg="white"
-      textAlign="center"
-      borderBottomWidth="4px"
-      borderBottomColor={item.is_available ? "ui.success" : "ui.danger"}
-    >
+      <Box
+        width="300px"
+        p={4}
+        borderRadius="lg"
+        boxShadow="md"
+        bg="white"
+        textAlign="center"
+        borderBottomWidth="4px"
+        borderBottomColor={item.is_available ? "ui.success" : "ui.danger"}
+      >
       <Flex justifyContent="space-between" alignItems="flex-start">
         {/* Card Content */}
         <Flex flexDirection="column" alignItems="center" w="100%">
@@ -400,12 +405,12 @@ function Items() {
       </Heading>
   
       {/* Search Bar */}
-      <Flex mb={4} mt={6}>
+      <Flex mb={4} mt={4}>
           <SearchBar placeholder="Search by item name..." onSearch={setSearchTerm} />
       </Flex>
   
       {/* Filters Section */}
-      <Flex gap={4} mb={4} flexDirection="column">
+      <Flex gap={4} mb={4} flexDirection="row" justifyContent="left">
           <BoolFilterComponent type="Item" onFilterChange={handleItemFilterChange} />
           <UUIDFilterComponent type="Room" onFilterChange={handleRoomFilterChange} />
       </Flex>
