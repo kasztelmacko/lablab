@@ -1,5 +1,4 @@
 import {
-  Badge,
   Box,
   Button,
   Container,
@@ -93,6 +92,9 @@ function ItemsGrid({
     placeholderData: (prevData: ItemsQueryData | undefined) => prevData,
   });
 
+  const totalPages = items ? Math.ceil(items.count / PER_PAGE) : 0;
+  const showPagination = totalPages > 1;
+
   const hasNextPage = !isPlaceholderData && items?.data.length === PER_PAGE;
   const hasPreviousPage = page > 1;
 
@@ -147,12 +149,14 @@ function ItemsGrid({
           ))
         )}
       </Flex>
-      <PaginationFooter
-        onChangePage={setPage}
-        page={page}
-        hasNextPage={hasNextPage}
-        hasPreviousPage={hasPreviousPage}
-      />
+      {showPagination && (
+        <PaginationFooter
+          onChangePage={setPage}
+          page={page}
+          hasNextPage={hasNextPage}
+          hasPreviousPage={hasPreviousPage}
+        />
+      )}
     </>
   );
 }
@@ -247,7 +251,7 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
         {canEditItems ? (
           <ActionsMenu type="Item" value={item} />
         ) : (
-          <Badge colorScheme="gray">No Actions</Badge>
+          null
         )}
       </Flex>
 

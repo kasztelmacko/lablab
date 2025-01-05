@@ -11,27 +11,29 @@ import {
   Text,
   useColorModeValue,
   useDisclosure,
-} from "@chakra-ui/react"
-import { useQueryClient } from "@tanstack/react-query"
-import { FiLogOut, FiMenu } from "react-icons/fi"
+  Icon,
+} from "@chakra-ui/react";
+import { Link } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { FiLogOut, FiMenu, FiSettings } from "react-icons/fi";
 
-import Logo from "/assets/images/fastapi-logo.svg"
-import type { UserPublic } from "../../client"
-import useAuth from "../../hooks/useAuth"
-import SidebarItems from "./SidebarItems"
+import Logo from "/assets/images/fastapi-logo.svg";
+import type { UserPublic } from "../../client";
+import useAuth from "../../hooks/useAuth";
+import SidebarItems from "./SidebarItems";
 
 const Sidebar = () => {
-  const queryClient = useQueryClient()
-  const bgColor = useColorModeValue("ui.light", "ui.dark")
-  const textColor = useColorModeValue("ui.dark", "ui.light")
-  const secBgColor = useColorModeValue("ui.secondary", "ui.darkSlate")
-  const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const { logout } = useAuth()
+  const queryClient = useQueryClient();
+  const bgColor = useColorModeValue("ui.light", "ui.dark");
+  const textColor = useColorModeValue("ui.dark", "ui.light");
+  const secBgColor = useColorModeValue("ui.secondary", "ui.darkSlate");
+  const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"]);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { logout } = useAuth();
 
   const handleLogout = async () => {
-    logout()
-  }
+    logout();
+  };
 
   return (
     <>
@@ -50,10 +52,27 @@ const Sidebar = () => {
         <DrawerContent maxW="250px">
           <DrawerCloseButton />
           <DrawerBody py={8}>
-            <Flex flexDir="column" justify="space-between">
+            <Flex flexDir="column" justify="space-between" h="100%">
               <Box>
                 <Image src={Logo} alt="logo" p={6} />
                 <SidebarItems onClose={onClose} />
+              </Box>
+              <Box>
+                {/* User Settings */}
+                <Flex
+                  as={Link}
+                  to="/settings"
+                  p={2}
+                  color={textColor}
+                  fontWeight="bold"
+                  alignItems="center"
+                  onClick={onClose}
+                >
+                  <Icon as={FiSettings} />
+                  <Text ml={2}>User Settings</Text>
+                </Flex>
+
+                {/* Logout */}
                 <Flex
                   as="button"
                   onClick={handleLogout}
@@ -65,12 +84,14 @@ const Sidebar = () => {
                   <FiLogOut />
                   <Text ml={2}>Log out</Text>
                 </Flex>
+
+                {/* Logged in as */}
+                {currentUser?.email && (
+                  <Text color={textColor} noOfLines={2} fontSize="sm" p={2}>
+                    Logged in as: {currentUser.email}
+                  </Text>
+                )}
               </Box>
-              {currentUser?.email && (
-                <Text color={textColor} noOfLines={2} fontSize="sm" p={2}>
-                  Logged in as: {currentUser.email}
-                </Text>
-              )}
             </Flex>
           </DrawerBody>
         </DrawerContent>
@@ -91,26 +112,56 @@ const Sidebar = () => {
           bg={secBgColor}
           p={4}
           borderRadius={12}
+          h="100%"
         >
           <Box>
             <Image src={Logo} alt="Logo" w="180px" maxW="2xs" p={6} />
             <SidebarItems />
           </Box>
-          {currentUser?.email && (
-            <Text
-              color={textColor}
-              noOfLines={2}
-              fontSize="sm"
+          <Box>
+            {/* User Settings */}
+            <Flex
+              as={Link}
+              to="/settings"
               p={2}
-              maxW="180px"
+              color={textColor}
+              fontWeight="bold"
+              alignItems="center"
             >
-              Logged in as: {currentUser.email}
-            </Text>
-          )}
+              <Icon as={FiSettings} />
+              <Text ml={2}>User Settings</Text>
+            </Flex>
+
+            {/* Logout */}
+            <Flex
+              as="button"
+              onClick={handleLogout}
+              p={2}
+              color="ui.danger"
+              fontWeight="bold"
+              alignItems="center"
+            >
+              <FiLogOut />
+              <Text ml={2}>Log out</Text>
+            </Flex>
+
+            {/* Logged in as */}
+            {currentUser?.email && (
+              <Text
+                color={textColor}
+                noOfLines={2}
+                fontSize="sm"
+                p={2}
+                maxW="180px"
+              >
+                Logged in as: {currentUser.email}
+              </Text>
+            )}
+          </Box>
         </Flex>
       </Box>
     </>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;

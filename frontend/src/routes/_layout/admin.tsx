@@ -68,6 +68,9 @@ function UsersGrid({
     placeholderData: (prevData: UsersQueryData | undefined) => prevData,
   });
 
+  const totalPages = users ? Math.ceil(users.count / PER_PAGE) : 0;
+  const showPagination = totalPages > 1;
+
   const hasNextPage = !isPlaceholderData && users?.data.length === PER_PAGE;
   const hasPreviousPage = page > 1;
 
@@ -158,19 +161,21 @@ function UsersGrid({
                     disabled={currentUser?.user_id === user.user_id}
                   />
                 ) : (
-                  <Badge colorScheme="gray">No Actions</Badge>
+                  null
                 )}
               </Flex>
             </Box>
           ))
         )}
       </Flex>
-      <PaginationFooter
-        onChangePage={setPage}
-        page={page}
-        hasNextPage={hasNextPage}
-        hasPreviousPage={hasPreviousPage}
-      />
+      {showPagination && (
+        <PaginationFooter
+          onChangePage={setPage}
+          page={page}
+          hasNextPage={hasNextPage}
+          hasPreviousPage={hasPreviousPage}
+        />
+      )}
     </>
   );
 }
