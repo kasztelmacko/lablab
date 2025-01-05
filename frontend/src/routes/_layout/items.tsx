@@ -39,6 +39,7 @@ import AddItem from "../../components/Items/AddItem";
 import TakeItem from "../../components/Items/TakeItem";
 import BoolFilterComponent from "../../components/Common/Filters/FilterBOOL.tsx";
 import UUIDFilterComponent from "../../components/Common/Filters/FilterUUID.tsx";
+import SearchBar from "../../components/Common/SearchBar.tsx";
 import { PaginationFooter } from "../../components/Common/PaginationFooter.tsx";
 
 const itemsSearchSchema = z.object({
@@ -65,9 +66,11 @@ function getItemsQueryOptions({ page }: { page: number }) {
 function ItemsGrid({
   itemFilters,
   roomFilters,
+  searchTerm,
 }: {
   itemFilters: { [key: string]: boolean | null };
   roomFilters: { [key: string]: string | null };
+  searchTerm: string;
 }) {
   const queryClient = useQueryClient();
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"]);
@@ -102,6 +105,10 @@ function ItemsGrid({
   const canEditItems = currentUser?.is_superuser || currentUser?.can_edit_items || false;
 
   const filteredItems = items?.data.filter((item: ItemPublic) => {
+    // Filter by search term
+    if (searchTerm && !item.item_name?.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return false;
+    }
     // Filter by availability
     if (itemFilters.is_available !== null && item.is_available !== itemFilters.is_available) {
       return false;
@@ -358,6 +365,8 @@ function Items() {
     room_id: null,
   });
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   const handleItemFilterChange = (filterKey: string, filterValue: boolean | null) => {
     if (filterKey === "all") {
       setItemFilters({ is_available: null });
@@ -385,12 +394,20 @@ function Items() {
       <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
         Items Management
       </Heading>
-      <Flex gap={4} mb={4} mt={6}>
-        <BoolFilterComponent type="Item" onFilterChange={handleItemFilterChange} />
-        <UUIDFilterComponent type="Room" onFilterChange={handleRoomFilterChange} />
+  
+      {/* Search Bar */}
+      <Flex mb={4} mt={6}>
+          <SearchBar placeholder="Search by item name..." onSearch={setSearchTerm} />
       </Flex>
+  
+      {/* Filters Section */}
+      <Flex gap={4} mb={4} flexDirection="column">
+          <BoolFilterComponent type="Item" onFilterChange={handleItemFilterChange} />
+          <UUIDFilterComponent type="Room" onFilterChange={handleRoomFilterChange} />
+      </Flex>
+  
       <Navbar type={"Item"} addModalAs={AddItem} />
-      <ItemsGrid itemFilters={itemFilters} roomFilters={roomFilters} />
+      <ItemsGrid itemFilters={itemFilters} roomFilters={roomFilters} searchTerm={searchTerm} />
     </Container>
-  );
-}
+  )
+};

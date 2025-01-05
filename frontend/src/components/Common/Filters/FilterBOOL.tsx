@@ -21,24 +21,19 @@ const BoolFilterComponent = ({ type, onFilterChange }: FilterComponentProps) => 
   const placeholder = type === "User" ? "All Users" : "All Items";
 
   return (
-    <FormControl>
+    <FormControl w="100%" maxW="300px">
       <Select
         id="bool-filter"
         onChange={handleFilterChange}
         defaultValue="all"
       >
-        {/* Default Option: All */}
         <option value="all">{placeholder}</option>
-
-        {/* Item Filters */}
         {type === "Item" && (
           <>
             <option value="true">Available Items</option>
             <option value="false">Unavailable Items</option>
           </>
         )}
-
-        {/* User Filters */}
         {type === "User" && (
           <>
             <option value="true">Part of Lab</option>

@@ -26,17 +26,14 @@ const UUIDFilterComponent = ({ onFilterChange }: FilterUUIDProps) => {
   };
 
   return (
-    <FormControl>
+    <FormControl w="100%" maxW="300px">
       <Select
         id="room-filter"
         onChange={handleFilterChange}
         defaultValue="all"
         isDisabled={isRoomsLoading}
       >
-        {/* Default Option: All */}
         <option value="all">All Rooms</option>
-
-        {/* Room Filters */}
         {rooms?.map((room: RoomPublic) => (
           <option key={room.room_id} value={room.room_id}>
             {room.room_number} - {room.room_place}

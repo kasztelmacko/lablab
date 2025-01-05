@@ -16,6 +16,7 @@ import { z } from "zod";
 import { type UserPublic, UsersService } from "../../client";
 import ActionsMenu from "../../components/Common/ActionsMenu";
 import BoolFilterComponent from "../../components/Common/Filters/FilterBOOL.tsx";
+import SearchBar from "../../components/Common/SearchBar.tsx";
 import { PaginationFooter } from "../../components/Common/PaginationFooter.tsx";
 
 const usersSearchSchema = z.object({
@@ -39,7 +40,13 @@ function getUsersQueryOptions({ page }: { page: number }) {
   };
 }
 
-function UsersGrid({ filters }: { filters: { is_part_of_lab: boolean | null } }) {
+function UsersGrid({
+  filters,
+  searchTerm,
+}: {
+  filters: { is_part_of_lab: boolean | null };
+  searchTerm: string;
+}) {
   const queryClient = useQueryClient();
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"]);
   const { page } = Route.useSearch();
@@ -72,12 +79,17 @@ function UsersGrid({ filters }: { filters: { is_part_of_lab: boolean | null } })
 
   const canEditUsers = currentUser?.is_superuser || currentUser?.can_edit_users;
 
-  // Apply filters to users
+  // Apply filters and search term to users
   const filteredUsers = users?.data.filter((user: UserPublic) => {
-    if (filters.is_part_of_lab === null) {
-      return true; // No filter applied
+    // Filter by search term
+    if (searchTerm && !user.full_name?.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return false;
     }
-    return user.is_part_of_lab === filters.is_part_of_lab;
+    // Filter by is_part_of_lab
+    if (filters.is_part_of_lab !== null && user.is_part_of_lab !== filters.is_part_of_lab) {
+      return false;
+    }
+    return true;
   });
 
   return (
@@ -168,25 +180,30 @@ function Admin() {
     is_part_of_lab: null,
   });
 
-  const handleFilterChange = (filterKey: string, filterValue: string | boolean | null) => {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleFilterChange = (filterKey: string, filterValue: boolean | null) => {
     if (filterKey === "all") {
       setFilters({ is_part_of_lab: null });
-    } else if (filterKey === "is_part_of_lab" && (filterValue === null || typeof filterValue === "boolean")) {
+    } else {
       setFilters({ is_part_of_lab: filterValue });
     }
   };
 
   return (
     <Container maxW="full">
-      <Flex justifyContent="space-between" alignItems="center" pt={12} mb={4}>
-        <Heading size="lg" textAlign={{ base: "center", md: "left" }}>
-          Users Management
-        </Heading>
-        <Flex gap={4} mb={4} mt={6}>
-          <BoolFilterComponent type="User" onFilterChange={handleFilterChange} />
-        </Flex>
+      <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
+        Users Management
+      </Heading>
+      {/* SearchBar */}
+      <Flex mb={4} mt={6}>
+        <SearchBar placeholder="Search by full name..." onSearch={setSearchTerm} />
       </Flex>
-      <UsersGrid filters={filters} />
+      {/* Filters in one line */}
+      <Flex gap={4} mb={4} flexDirection="column">
+        <BoolFilterComponent type="User" onFilterChange={handleFilterChange} />
+      </Flex>
+      <UsersGrid filters={filters} searchTerm={searchTerm} />
     </Container>
   );
 }
