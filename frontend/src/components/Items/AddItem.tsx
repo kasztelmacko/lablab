@@ -27,8 +27,8 @@ import useCustomToast from "../../hooks/useCustomToast"
 import { handleError } from "../../utils"
 
 interface AddItemProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const AddItem = ({ isOpen, onClose }: AddItemProps) => {

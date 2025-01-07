@@ -33,8 +33,6 @@ import {
   RoomsService,
 } from "../../client";
 import ActionsMenu from "../../components/Common/ActionsMenu";
-import Navbar from "../../components/Common/Navbar";
-import AddItem from "../../components/Items/AddItem";
 import TakeItem from "../../components/Items/TakeItem";
 import BoolFilterComponent from "../../components/Common/Filters/FilterBOOL.tsx";
 import UUIDFilterComponent from "../../components/Common/Filters/FilterUUID.tsx";
@@ -213,7 +211,7 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
         borderBottomWidth="4px"
         borderBottomColor={item.is_available ? "ui.success" : "ui.danger"}
       >
-      <Flex justifyContent="space-between" alignItems="flex-start">
+      <Flex justifyContent="space-between" alignItems="flex-start" position="relative">
         {/* Card Content */}
         <Flex flexDirection="column" alignItems="center" w="100%">
           <Text fontSize="xl" fontWeight="bold" mb={2}>
@@ -238,12 +236,12 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
           </Flex>
 
           {item.current_owner_id && (
-          <Flex justifyContent="center" alignItems="center" mb={2}>
-            <Text color="gray.600">
-              <strong>Current Owner:</strong>
-              <div>{user?.full_name || ""}</div>
-            </Text>
-          </Flex>
+            <Flex justifyContent="center" alignItems="center" mb={2}>
+              <Text color="gray.600">
+                <strong>Current Owner:</strong>
+                <div>{user?.full_name || ""}</div>
+              </Text>
+            </Flex>
           )}
 
           {/* Button to open the modal */}
@@ -253,10 +251,10 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
         </Flex>
 
         {/* Actions Menu */}
-        {canEditItems ? (
-          <ActionsMenu type="Item" value={item} />
-        ) : (
-          null
+        {canEditItems && (
+          <Box position="absolute" right={0} top={0}>
+            <ActionsMenu type="Item" value={item} />
+          </Box>
         )}
       </Flex>
 
@@ -332,13 +330,21 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
             </Flex>
           </ModalBody>
           <ModalFooter>
-            {isCurrentUserOwner && (
-              <Button onClick={onReleaseItemOpen} mr={3}>
-                Release Item
-              </Button>
-            )}
-            <Button onClick={onTakeItemOpen}>Take Item</Button>
-          </ModalFooter>
+          {isCurrentUserOwner && (
+            <Button 
+              variant="danger"
+              onClick={onReleaseItemOpen} mr={3}>
+              Release Item
+            </Button>
+          )}
+          {item.is_available && (
+            <Button 
+              variant="primary" 
+              onClick={onTakeItemOpen}>
+              Take Item
+            </Button>
+          )}
+        </ModalFooter>
         </ModalContent>
       </Modal>
 
@@ -400,8 +406,9 @@ function Items() {
 
   return (
     <Container maxW="full">
+      <br></br>
       <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
-        Items Management
+        Items
       </Heading>
   
       {/* Search Bar */}
@@ -414,8 +421,7 @@ function Items() {
           <BoolFilterComponent type="Item" onFilterChange={handleItemFilterChange} />
           <UUIDFilterComponent type="Room" onFilterChange={handleRoomFilterChange} />
       </Flex>
-  
-      <Navbar type={"Item"} addModalAs={AddItem} />
+
       <ItemsGrid itemFilters={itemFilters} roomFilters={roomFilters} searchTerm={searchTerm} />
     </Container>
   )

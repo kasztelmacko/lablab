@@ -39,7 +39,7 @@ const theme = extendTheme({
           backgroundColor: "ui.danger",
           color: "ui.light",
           _hover: {
-            backgroundColor: "#E32727",
+            backgroundColor: "#640b0b",
           },
         },
       },

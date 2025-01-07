@@ -107,23 +107,6 @@ const AddRoom = ({ isOpen, onClose }: AddRoomProps) => {
               <FormErrorMessage>{errors.room_place.message}</FormErrorMessage>
             )}
           </FormControl>
-
-          <FormControl mt={4} isInvalid={!!errors.room_owner_id}>
-            <FormLabel htmlFor="room_owner_id">Room Owner ID</FormLabel>
-            <Input
-              id="room_owner_id"
-              {...register("room_owner_id", {
-                required: "Room owner ID is required.",
-              })}
-              placeholder="Room Owner ID"
-              type="text"
-              value={currentUser?.user_id || ""} // Pre-fill with current user's ID
-              isReadOnly // Make the field read-only
-            />
-            {errors.room_owner_id && (
-              <FormErrorMessage>{errors.room_owner_id.message}</FormErrorMessage>
-            )}
-          </FormControl>
         </ModalBody>
 
         <ModalFooter gap={3}>

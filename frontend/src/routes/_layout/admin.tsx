@@ -100,7 +100,7 @@ function UsersGrid({
       <Flex
         flexWrap="wrap"
         gap={6}
-        justifyContent="center"
+        justifyContent="left"
         alignItems="stretch"
         mt={6}
       >
@@ -151,18 +151,18 @@ function UsersGrid({
                     <FiMail size={24} color="gray" style={{ marginRight: "8px" }} />
                     <Text color="gray.600">{user.email}</Text>
                   </Flex>
-                </Flex>
 
-                {/* Actions Menu */}
-                {canEditUsers ? (
-                  <ActionsMenu
-                    type="User"
-                    value={user}
-                    disabled={currentUser?.user_id === user.user_id}
-                  />
-                ) : (
-                  null
-                )}
+                  {/* Actions Menu */}
+                  {canEditUsers ? (
+                    <ActionsMenu
+                      type="User"
+                      value={user}
+                      disabled={currentUser?.user_id === user.user_id}
+                    />
+                  ) : (
+                    null
+                  )}
+                </Flex>
               </Flex>
             </Box>
           ))
@@ -197,8 +197,9 @@ function Admin() {
 
   return (
     <Container maxW="full">
+      <br></br>
       <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
-        Users Management
+        Users
       </Heading>
       {/* SearchBar */}
       <Flex mb={4} mt={6}>

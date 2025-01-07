@@ -145,7 +145,6 @@ import {
                 {...register("current_room", {
                   required: "Current room is required.",
                 })}
-                placeholder="Select a room"
                 isDisabled={isRoomsLoading}
               >
                 {rooms?.map((room: RoomPublic) => (

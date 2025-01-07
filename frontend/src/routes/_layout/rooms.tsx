@@ -1,14 +1,10 @@
 import {
-    Container,
-    Heading,
-    SkeletonText,
-    Table,
-    TableContainer,
-    Tbody,
-    Td,
-    Th,
-    Thead,
-    Tr,
+  Box,
+  Container,
+  Flex,
+  Heading,
+  Skeleton,
+  Text,
   } from "@chakra-ui/react"
   import { useQuery, useQueryClient } from "@tanstack/react-query"
   import { createFileRoute, useNavigate } from "@tanstack/react-router"
@@ -42,7 +38,7 @@ import {
     }
   }
   
-  function RoomsTable() {
+  function RoomsGrid() {
     const queryClient = useQueryClient()
     const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
     const { page } = Route.useSearch()
@@ -53,6 +49,7 @@ import {
     // Define the expected shape of the query data
     type RoomsQueryData = {
       data: RoomPublic[]
+      count: number;
     }
   
     const {
@@ -61,8 +58,11 @@ import {
       isPlaceholderData,
     } = useQuery<RoomsQueryData>({
       ...getRoomsQueryOptions({ page }),
-      placeholderData: (prevData: RoomsQueryData | undefined) => prevData, // Explicitly type prevData
+      placeholderData: (prevData: RoomsQueryData | undefined) => prevData,
     })
+
+    const totalPages = rooms ? Math.ceil(rooms.count / PER_PAGE) : 0;
+    const showPagination = totalPages > 1;
   
     const hasNextPage = !isPlaceholderData && rooms?.data.length === PER_PAGE
     const hasPreviousPage = page > 1
@@ -78,66 +78,98 @@ import {
   
     return (
       <>
-        <TableContainer>
-          <Table size={{ base: "sm", md: "md" }}>
-            <Thead>
-              <Tr>
-                <Th>Room Number</Th>
-                <Th>Room Place</Th>
-                <Th>Room Owner ID</Th>
-                <Th>Actions</Th>
-              </Tr>
-            </Thead>
-            {isPending ? (
-              <Tbody>
-                <Tr>
-                  {new Array(4).fill(null).map((_, index) => (
-                    <Td key={index}>
-                      <SkeletonText noOfLines={1} paddingBlock="16px" />
-                    </Td>
-                  ))}
-                </Tr>
-              </Tbody>
-            ) : (
-              <Tbody>
-                {rooms?.data.map((room: RoomPublic) => (
-                  <Tr key={room.room_id} opacity={isPlaceholderData ? 0.5 : 1}>
-                    <Td>{room.room_number}</Td>
-                    <Td>{room.room_place}</Td>
-                    <Td>{room.room_owner_id}</Td>
-                    <Td>
-                      {canEditRooms ? (
-                        <ActionsMenu type={"Room"} value={room} />
-                      ) : (
-                        []
-                      )}
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            )}
-          </Table>
-        </TableContainer>
-        <PaginationFooter
-          page={page}
-          onChangePage={setPage}
-          hasNextPage={hasNextPage}
-          hasPreviousPage={hasPreviousPage}
-        />
-      </>
-    )
-  }
-  
-  function Rooms() {
-    return (
-      <Container maxW="full">
-        <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
-          Rooms Management
-        </Heading>
-  
+        <Flex
+          flexWrap="wrap"
+          gap={6}
+          justifyContent="left"
+          alignItems="stretch"
+          mt={6}
+        >
+          {isPending ? (
+            // Skeleton Loading State
+            new Array(5).fill(null).map((_, index) => (
+              <Box
+                key={index}
+                w={{ base: "100%", md: "48%", lg: "31%", xl: "18%" }}
+                p={4}
+                borderWidth="1px"
+                borderRadius="lg"
+                boxShadow="md"
+                bg="white"
+              >
+                <Skeleton height="20px" mb={2} />
+                <Skeleton height="16px" mb={2} />
+                <Skeleton height="16px" mb={2} />
+                <Skeleton height="16px" mb={2} />
+                <Skeleton height="32px" />
+              </Box>
+            ))
+          ) : (
+            // Room Cards
+            rooms?.data.map((room: RoomPublic) => (
+              <Box
+                key={room.room_id}
+                w={{ base: "100%", md: "48%", lg: "31%", xl: "18%" }}
+                p={4}
+                borderRadius="lg"
+                boxShadow="md"
+                bg="white"
+                textAlign="center"
+                opacity={isPlaceholderData ? 0.5 : 1}
+              >
+                <Flex justifyContent="space-between" alignItems="flex-start">
+                  {/* Card Content */}
+                  <Flex flexDirection="column" alignItems="center" w="100%">
+                    <Text fontSize="xl" fontWeight="bold" mb={2}>
+                      {room.room_number}
+                    </Text>
+    
+                    <Flex justifyContent="center" alignItems="center" mb={4}>
+                      <Text color="gray.600">{room.room_place}</Text>
+                    </Flex>
+                  
+    
+                    {/* Actions Menu */}
+                    {canEditRooms ? (
+                      <ActionsMenu
+                        type="Room"
+                        value={room}
+                      />
+                    ) : (
+                      null
+                    )}
+                  </Flex>
+                </Flex>
+              </Box>
+            ))
+          )}
+        
         <Navbar type={"Room"} addModalAs={AddRoom} />
-        <RoomsTable />
-      </Container>
-    )
+        </Flex>
+    
+        {/* Pagination */}
+        {showPagination && (
+          <PaginationFooter
+            onChangePage={setPage}
+            page={page}
+            hasNextPage={hasNextPage}
+            hasPreviousPage={hasPreviousPage}
+          />
+        )}
+      </>
+    );
   }
   
+function Rooms() {
+  return (
+    <Container maxW="full">
+      <br></br>
+      <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
+        Rooms
+      </Heading>
+
+      <RoomsGrid />
+    </Container>
+  );
+}
+

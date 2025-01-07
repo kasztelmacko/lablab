@@ -4,8 +4,8 @@ import { Button, Flex, Icon, useDisclosure } from "@chakra-ui/react"
 import { FaPlus } from "react-icons/fa"
 
 interface NavbarProps {
-  type: string
-  addModalAs: ComponentType | ElementType
+  type: string;
+  addModalAs: ComponentType | ElementType;
 }
 
 const Navbar = ({ type, addModalAs }: NavbarProps) => {
