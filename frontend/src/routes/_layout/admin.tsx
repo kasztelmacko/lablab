@@ -134,6 +134,7 @@ function UsersGrid({
               textAlign="center"
               borderBottomWidth={user.is_part_of_lab ? "4px" : "0"}
               borderBottomColor={user.is_part_of_lab ? "ui.success" : "transparent"}
+              position="relative"
             >
               <Flex justifyContent="space-between" alignItems="flex-start">
                 {/* Card Content */}
@@ -153,14 +154,14 @@ function UsersGrid({
                   </Flex>
 
                   {/* Actions Menu */}
-                  {canEditUsers ? (
-                    <ActionsMenu
-                      type="User"
-                      value={user}
-                      disabled={currentUser?.user_id === user.user_id}
-                    />
-                  ) : (
-                    null
+                  {canEditUsers && (
+                    <Box position="absolute" right={4} top={4}>
+                      <ActionsMenu
+                        type="User"
+                        value={user}
+                        disabled={currentUser?.user_id === user.user_id}
+                      />
+                    </Box>
                   )}
                 </Flex>
               </Flex>

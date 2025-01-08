@@ -9,14 +9,14 @@ const disabledStyles = {
 const theme = extendTheme({
   colors: {
     ui: {
-      main: "#009688",
-      secondary: "#EDF2F7",
+      main: "#578E7E",
+      secondary: "white",
       success: "#48BB78",
       danger: "#E53E3E",
-      light: "#FAFAFA",
-      dark: "#1A202C",
-      darkSlate: "#252D3D",
-      dim: "#A0AEC0",
+      light: "white",
+      dark: "#3D3D3D",
+      darkSlate: "#3D3D3D",
+      dim: "white",
     },
   },
   components: {
@@ -26,7 +26,7 @@ const theme = extendTheme({
           backgroundColor: "ui.main",
           color: "ui.light",
           _hover: {
-            backgroundColor: "#00766C",
+            backgroundColor: "#07524b",
           },
           _disabled: {
             ...disabledStyles,
@@ -39,7 +39,7 @@ const theme = extendTheme({
           backgroundColor: "ui.danger",
           color: "ui.light",
           _hover: {
-            backgroundColor: "#640b0b",
+            backgroundColor: "#a62d2d",
           },
         },
       },

@@ -85,6 +85,22 @@ import {
           alignItems="stretch"
           mt={6}
         >
+          {/* Add Room Card */}
+          {canEditRooms && (
+          <Box
+            w={{ base: "100%", md: "48%", lg: "31%", xl: "18%" }}
+            p={4}
+            borderRadius="lg"
+            boxShadow="md"
+            bg="white"
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Navbar type={"Room"} addModalAs={AddRoom} />
+          </Box>
+          )}
+    
           {isPending ? (
             // Skeleton Loading State
             new Array(5).fill(null).map((_, index) => (
@@ -116,6 +132,7 @@ import {
                 bg="white"
                 textAlign="center"
                 opacity={isPlaceholderData ? 0.5 : 1}
+                position="relative"
               >
                 <Flex justifyContent="space-between" alignItems="flex-start">
                   {/* Card Content */}
@@ -127,24 +144,21 @@ import {
                     <Flex justifyContent="center" alignItems="center" mb={4}>
                       <Text color="gray.600">{room.room_place}</Text>
                     </Flex>
-                  
     
                     {/* Actions Menu */}
-                    {canEditRooms ? (
-                      <ActionsMenu
-                        type="Room"
-                        value={room}
-                      />
-                    ) : (
-                      null
+                    {canEditRooms && (
+                      <Box position="absolute" right={4} top={4}>
+                        <ActionsMenu
+                          type="Room"
+                          value={room}
+                        />
+                      </Box>
                     )}
                   </Flex>
                 </Flex>
               </Box>
             ))
           )}
-        
-        <Navbar type={"Room"} addModalAs={AddRoom} />
         </Flex>
     
         {/* Pagination */}
