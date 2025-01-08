@@ -10,10 +10,12 @@ import {
   Input,
   Text,
   useColorModeValue,
+  Icon,
 } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
+import { FiCheckCircle, FiXCircle } from "react-icons/fi"
 
 import {
   type ApiError,
@@ -28,6 +30,8 @@ import { emailPattern, handleError } from "../../utils"
 const UserInformation = () => {
   const queryClient = useQueryClient()
   const color = useColorModeValue("inherit", "ui.light")
+  const successColor = useColorModeValue("ui.success", "ui.success")
+  const dangerColor = useColorModeValue("ui.danger", "ui.danger")
   const showToast = useCustomToast()
   const [editMode, setEditMode] = useState(false)
   const { user: currentUser } = useAuth()
@@ -43,6 +47,9 @@ const UserInformation = () => {
     defaultValues: {
       full_name: currentUser?.full_name,
       email: currentUser?.email,
+      can_edit_labs: currentUser?.can_edit_labs,
+      can_edit_users: currentUser?.can_edit_users,
+      can_edit_items: currentUser?.can_edit_items,
     },
   })
 
@@ -131,6 +138,38 @@ const UserInformation = () => {
             {errors.email && (
               <FormErrorMessage>{errors.email.message}</FormErrorMessage>
             )}
+          </FormControl>
+          <FormControl mt={4}>
+            <FormLabel color={color}>Permissions</FormLabel>
+            <Flex direction="column" gap={2}>
+              <Flex align="center" gap={2}>
+                <Icon
+                  as={currentUser?.can_edit_labs ? FiCheckCircle : FiXCircle}
+                  color={
+                    currentUser?.can_edit_labs ? successColor : dangerColor
+                  }
+                />
+                <Text>Can Edit Rooms</Text>
+              </Flex>
+              <Flex align="center" gap={2}>
+                <Icon
+                  as={currentUser?.can_edit_users ? FiCheckCircle : FiXCircle}
+                  color={
+                    currentUser?.can_edit_users ? successColor : dangerColor
+                  }
+                />
+                <Text>Can Edit Users</Text>
+              </Flex>
+              <Flex align="center" gap={2}>
+                <Icon
+                  as={currentUser?.can_edit_items ? FiCheckCircle : FiXCircle}
+                  color={
+                    currentUser?.can_edit_items ? successColor : dangerColor
+                  }
+                />
+                <Text>Can Edit Items</Text>
+              </Flex>
+            </Flex>
           </FormControl>
           <Flex mt={4} gap={3}>
             <Button
