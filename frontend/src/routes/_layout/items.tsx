@@ -122,17 +122,22 @@ function ItemsGrid({
 
   return (
     <>
-      <Flex
+      <Box
+        display="grid"
+        gridTemplateColumns={{
+          base: "repeat(2, 200px)",
+          md: "repeat(3, 200px)",
+          lg: "repeat(4, 200px)",
+          xl: "repeat(5, 200px)",
+        }}
         gap={6}
         mt={6}
-        justifyContent="left"
-        flexDirection="row"
       >
         {isPending ? (
           new Array(5).fill(null).map((_, index) => (
             <Box
               key={index}
-              width="300px"
+              width="200px"
               p={4}
               borderWidth="1px"
               borderRadius="lg"
@@ -155,7 +160,7 @@ function ItemsGrid({
             />
           ))
         )}
-      </Flex>
+      </Box>
       {showPagination && (
         <PaginationFooter
           onChangePage={setPage}
@@ -206,7 +211,7 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
 
   return (
       <Box
-        width="300px"
+        width="200px"
         p={4}
         borderRadius="lg"
         boxShadow="md"
@@ -239,14 +244,12 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
             </Text>
           </Flex>
 
-          {item.current_owner_id && (
-            <Flex justifyContent="center" alignItems="center" mb={2}>
-              <Text color="gray.600">
-                <strong>Current Owner:</strong>
-                <div>{user?.full_name || ""}</div>
-              </Text>
-            </Flex>
-          )}
+          <Flex justifyContent="center" alignItems="center" mb={2}>
+            <Text color="gray.600">
+              <strong>Current Owner:</strong>
+              <div>{item.current_owner_id ? user?.full_name : "Item Available"}</div>
+            </Text>
+          </Flex>
 
           {/* Button to open the modal */}
           <Button onClick={onDetailsOpen} mt={4}>
@@ -293,8 +296,7 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
               </Box>
               <Box borderWidth="1px" borderRadius="lg" p={4} bg="gray.50">
                 <Text>
-                  <strong>Current Room:</strong> 
-                  {room?.room_number || "N/A"}
+                  <strong>Current Room:</strong> {room?.room_number || "N/A"}
                 </Text>
               </Box>
 
