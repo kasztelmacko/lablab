@@ -6,9 +6,10 @@ import { FaPlus } from "react-icons/fa"
 interface NavbarProps {
   type: string;
   addModalAs: ComponentType | ElementType;
+  roomId?: string;
 }
 
-const Navbar = ({ type, addModalAs }: NavbarProps) => {
+const Navbar = ({ type, addModalAs, roomId }: NavbarProps) => {
   const addModal = useDisclosure()
 
   const AddModal = addModalAs
@@ -30,7 +31,7 @@ const Navbar = ({ type, addModalAs }: NavbarProps) => {
         >
           <Icon as={FaPlus} /> Add {type}
         </Button>
-        <AddModal isOpen={addModal.isOpen} onClose={addModal.onClose} />
+        <AddModal isOpen={addModal.isOpen} onClose={addModal.onClose} roomId={roomId}/>
       </Flex>
     </>
   )

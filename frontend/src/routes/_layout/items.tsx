@@ -148,7 +148,11 @@ function ItemsGrid({
           ))
         ) : (
           filteredItems?.map((item: ItemPublic) => (
-            <ItemCard key={item.item_id} item={item} canEditItems={canEditItems} />
+            <ItemCard 
+              key={item.item_id} 
+              item={item} 
+              canEditItems={canEditItems} 
+            />
           ))
         )}
       </Flex>

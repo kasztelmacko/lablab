@@ -15,6 +15,7 @@ import {
   import ActionsMenu from "../../components/Common/ActionsMenu"
   import Navbar from "../../components/Common/Navbar"
   import AddRoom from "../../components/Rooms/AddRoom"
+  import AddItem from "../../components/Items/AddItem"
   import { PaginationFooter } from "../../components/Common/PaginationFooter.tsx"
   
   const roomsSearchSchema = z.object({
@@ -75,6 +76,7 @@ import {
   
     // Check if the current user has permission to edit rooms
     const canEditRooms = currentUser?.is_superuser || currentUser?.can_edit_labs
+    const canEditItems = currentUser?.is_superuser || currentUser?.can_edit_items
   
     return (
       <>
@@ -144,6 +146,10 @@ import {
                     <Flex justifyContent="center" alignItems="center" mb={4}>
                       <Text color="gray.600">{room.room_place}</Text>
                     </Flex>
+
+                    {canEditItems && (
+                    <Navbar type={"Item"} addModalAs={AddItem} roomId ={room.room_id}/>
+                    )}
     
                     {/* Actions Menu */}
                     {canEditRooms && (

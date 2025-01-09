@@ -29,17 +29,19 @@ import { handleError } from "../../utils"
 interface AddItemProps {
   isOpen: boolean;
   onClose: () => void;
+  roomId: string;
 }
 
-const AddItem = ({ isOpen, onClose }: AddItemProps) => {
+const AddItem = ({ isOpen, onClose, roomId }: AddItemProps) => {
   const queryClient = useQueryClient()
   const showToast = useCustomToast()
 
-  // Fetch the list of rooms
-  const { data: rooms, isLoading: isRoomsLoading } = useQuery<RoomPublic[]>({
-    queryKey: ["rooms"],
-    queryFn: () => RoomsService.readRooms({}).then((response) => response.data),
-  })
+  // Fetch the room
+  const { data: room } = useQuery<RoomPublic>({
+    queryKey: ["room", roomId],
+    queryFn: () => RoomsService.readRoom({ room_id: roomId }),
+    enabled: !!roomId,
+  });
 
   const {
     register,
@@ -51,7 +53,7 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
     criteriaMode: "all",
     defaultValues: {
       item_name: "",
-      current_room: "",
+      current_room: roomId,
       item_img_url: "",
       item_vendor: "",
       item_params: "",
@@ -117,14 +119,13 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
               {...register("current_room", {
                 required: "Current room is required.",
               })}
-              placeholder="Select a room"
-              isDisabled={isRoomsLoading}
+              isDisabled
             >
-              {rooms?.map((room: RoomPublic) => (
-                <option key={room.room_id} value={room.room_id}>
+              {room && (
+                <option value={room.room_id}>
                   {room.room_number} - {room.room_place}
                 </option>
-              ))}
+              )}
             </Select>
             {errors.current_room && (
               <FormErrorMessage>{errors.current_room.message}</FormErrorMessage>
