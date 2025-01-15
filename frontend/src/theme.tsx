@@ -1,21 +1,21 @@
-import { extendTheme } from "@chakra-ui/react"
+import { extendTheme } from "@chakra-ui/react";
 
 const disabledStyles = {
   _disabled: {
     backgroundColor: "ui.main",
   },
-}
+};
 
 const theme = extendTheme({
   colors: {
     ui: {
-      main: "#578E7E",
+      main: "#211f1f",
       secondary: "white",
-      success: "#48BB78",
+      success: "#50ad58",
       danger: "#E53E3E",
       light: "white",
-      dark: "#3D3D3D",
-      darkSlate: "#3D3D3D",
+      dark: "#211f1f",
+      darkSlate: "#211f1f",
       dim: "white",
     },
   },
@@ -23,10 +23,13 @@ const theme = extendTheme({
     Button: {
       variants: {
         primary: {
-          backgroundColor: "ui.main",
-          color: "ui.light",
+          backgroundColor: "ui.secondary",
+          color: "ui.dark",
+          border: "2px solid",
+          borderColor: "ui.dark",
           _hover: {
-            backgroundColor: "#07524b",
+            backgroundColor: "ui.dark",
+            color: "ui.secondary",
           },
           _disabled: {
             ...disabledStyles,
@@ -56,6 +59,6 @@ const theme = extendTheme({
       },
     },
   },
-})
+});
 
-export default theme
+export default theme;

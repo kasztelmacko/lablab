@@ -90,6 +90,19 @@ function ItemsGrid({
     placeholderData: (prevData: ItemsQueryData | undefined) => prevData,
   });
 
+  const { data: users } = useQuery<UserPublic[]>({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const response = await UsersService.readUsers();
+      return response.data;
+    },
+  });
+
+  const userMap = users?.reduce((acc: { [key: string]: UserPublic }, user: UserPublic) => {
+    acc[user.user_id] = user;
+    return acc;
+  }, {} as { [key: string]: UserPublic });
+
   const totalPages = items ? Math.ceil(items.count / PER_PAGE) : 0;
   const showPagination = totalPages > 1;
 
@@ -105,18 +118,28 @@ function ItemsGrid({
   const canEditItems = currentUser?.is_superuser || currentUser?.can_edit_items || false;
 
   const filteredItems = items?.data.filter((item: ItemPublic) => {
-    // Filter by search term
-    if (searchTerm && !item.item_name?.toLowerCase().includes(searchTerm.toLowerCase())) {
-      return false;
+    const user = userMap?.[item.current_owner_id || ""];
+
+    // Filter by search term in item name or user full name
+    if (searchTerm) {
+      const itemNameMatch = item.item_name?.toLowerCase().includes(searchTerm.toLowerCase());
+      const userFullNameMatch = user?.full_name?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      if (!itemNameMatch && !userFullNameMatch) {
+        return false;
+      }
     }
+
     // Filter by availability
     if (itemFilters.is_available !== null && item.is_available !== itemFilters.is_available) {
       return false;
     }
+
     // Filter by current room (if room filter is applied)
     if (roomFilters.room_id !== null && item.current_room !== roomFilters.room_id) {
       return false;
     }
+
     return true;
   });
 
@@ -252,7 +275,7 @@ function ItemCard({ item, canEditItems }: { item: ItemPublic; canEditItems: bool
           </Flex>
 
           {/* Button to open the modal */}
-          <Button onClick={onDetailsOpen} mt={4}>
+          <Button onClick={onDetailsOpen} mt={4} variant="primary">
             View Details
           </Button>
         </Flex>
@@ -419,7 +442,7 @@ function Items() {
   
       {/* Search Bar */}
       <Flex mb={4} mt={4}>
-          <SearchBar placeholder="Search by item name..." onSearch={setSearchTerm} />
+          <SearchBar placeholder="Search..." onSearch={setSearchTerm} />
       </Flex>
   
       {/* Filters Section */}

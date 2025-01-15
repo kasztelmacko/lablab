@@ -54,7 +54,7 @@ const Sidebar = () => {
           <DrawerBody py={8}>
             <Flex flexDir="column" justify="space-between" h="100%">
               <Box>
-                <Image src={Logo} alt="logo" p={6} />
+                <Image src={Logo} alt="logo" p={6} h="100px"/>
                 <SidebarItems onClose={onClose} />
               </Box>
               <Box>
@@ -104,6 +104,7 @@ const Sidebar = () => {
         h="100vh"
         position="sticky"
         top="0"
+        borderRight="1px solid #E2E8F0"
         display={{ base: "none", md: "flex" }}
       >
         <Flex
@@ -115,7 +116,7 @@ const Sidebar = () => {
           h="100%"
         >
           <Box>
-            <Image src={Logo} alt="Logo" w="180px" maxW="2xs" p={6} />
+            <Image src={Logo} alt="Logo" w="180px" maxW="2xs" p={6} h="100px"/>
             <SidebarItems />
           </Box>
           <Box>
@@ -127,6 +128,7 @@ const Sidebar = () => {
               color={textColor}
               fontWeight="bold"
               alignItems="center"
+              borderTop="1px solid #E2E8F0"
             >
               <Icon as={FiSettings} />
               <Text ml={2}>User Settings</Text>
