@@ -1,15 +1,21 @@
+from collections.abc import Generator
+
 from sqlmodel import Session, create_engine, select
+from supabase import create_client
 
-from app import crud
 from app.core.config import settings
-from app.models import User, UserCreate
-
-engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
-
+from app.models import User
 
 # make sure all SQLModel models are imported (app.models) before initializing DB
 # otherwise, SQLModel might fail to initialize relationships properly
 # for more details: https://github.com/fastapi/full-stack-fastapi-template/issues/28
+
+engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
+
+
+def get_db() -> Generator[Session, None]:
+    with Session(engine) as session:
+        yield session
 
 
 def init_db(session: Session) -> None:
@@ -17,17 +23,19 @@ def init_db(session: Session) -> None:
     # But if you don't want to use migrations, create
     # the tables un-commenting the next lines
     # from sqlmodel import SQLModel
-
-    # This works because the models are already imported and registered from app.models
+    # # This works because the models are already imported and registered from app.models
     # SQLModel.metadata.create_all(engine)
 
-    user = session.exec(
-        select(User).where(User.email == settings.FIRST_SUPERUSER)
-    ).first()
+    result = session.exec(select(User).where(User.email == settings.FIRST_SUPERUSER))
+    user = result.first()
     if not user:
-        user_in = UserCreate(
-            email=settings.FIRST_SUPERUSER,
-            password=settings.FIRST_SUPERUSER_PASSWORD,
-            is_superuser=True,
+        super_client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+        response = super_client.auth.sign_up(
+            {
+                "email": settings.FIRST_SUPERUSER,
+                "password": settings.FIRST_SUPERUSER_PASSWORD,
+            }
         )
-        user = crud.create_user(session=session, user_create=user_in)
+        assert response.user.email == settings.FIRST_SUPERUSER
+        assert response.user.id is not None
+        assert response.session.access_token is not None
