@@ -49,6 +49,7 @@ class Settings(BaseSettings):
         ]
 
     PROJECT_NAME: str
+    SENTRY_DSN: HttpUrl | None = None
     
     SUPABASE_URL: str
     SUPABASE_KEY: str

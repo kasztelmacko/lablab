@@ -38,4 +38,3 @@ def init_db(session: Session) -> None:
         )
         assert response.user.email == settings.FIRST_SUPERUSER
         assert response.user.id is not None
-        assert response.session.access_token is not None

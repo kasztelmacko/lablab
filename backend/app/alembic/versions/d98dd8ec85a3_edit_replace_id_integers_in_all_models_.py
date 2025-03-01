@@ -32,31 +32,33 @@ def upgrade():
     # Populate the new UUID columns
     op.execute('UPDATE "user" SET new_user_id = uuid_generate_v4()')
     op.execute('UPDATE item SET new_item_id = uuid_generate_v4()')
-    op.execute('UPDATE item SET new_current_owner_id = (SELECT new_user_id FROM "user" WHERE "user".id = item.current_owner_id)')
+    op.execute('UPDATE item SET new_current_owner_id = (SELECT new_user_id FROM "user" WHERE "user".user_id = item.current_owner_id)')
     op.execute('UPDATE room SET new_room_id = uuid_generate_v4()')
-    op.execute('UPDATE room SET new_room_owner_id = (SELECT new_user_id FROM "user" WHERE "user".id = room.room_owner_id)')
+    op.execute('UPDATE room SET new_room_owner_id = (SELECT new_user_id FROM "user" WHERE "user".user_id = room.room_owner_id)')
 
     # Set the new UUID columns as not nullable
     op.alter_column('user', 'new_user_id', nullable=False)
     op.alter_column('item', 'new_item_id', nullable=False)
     op.alter_column('room', 'new_room_id', nullable=False)
 
-    # Drop old columns and rename new columns
+    # Drop foreign key constraints
     op.drop_constraint('item_current_owner_id_fkey', 'item', type_='foreignkey')
+    op.drop_constraint('room_room_owner_id_fkey', 'room', type_='foreignkey')
+
+    # Drop old columns and rename new columns
     op.drop_column('item', 'current_owner_id')
     op.alter_column('item', 'new_current_owner_id', new_column_name='current_owner_id')
 
-    op.drop_column('user', 'id')
+    op.drop_column('user', 'user_id')
     op.alter_column('user', 'new_user_id', new_column_name='user_id')
 
-    op.drop_column('item', 'id')
+    op.drop_column('item', 'item_id')
     op.alter_column('item', 'new_item_id', new_column_name='item_id')
 
-    op.drop_constraint('room_room_owner_id_fkey', 'room', type_='foreignkey')
     op.drop_column('room', 'room_owner_id')
     op.alter_column('room', 'new_room_owner_id', new_column_name='room_owner_id')
 
-    op.drop_column('room', 'id')
+    op.drop_column('room', 'room_id')
     op.alter_column('room', 'new_room_id', new_column_name='room_id')
 
     # Create primary key constraints
@@ -97,23 +99,23 @@ def downgrade():
     op.alter_column('item', 'old_current_owner_id', new_column_name='current_owner_id')
 
     op.drop_column('user', 'user_id')
-    op.alter_column('user', 'old_id', new_column_name='id')
+    op.alter_column('user', 'old_id', new_column_name='user_id')
 
     op.drop_column('item', 'item_id')
-    op.alter_column('item', 'old_id', new_column_name='id')
+    op.alter_column('item', 'old_id', new_column_name='item_id')
 
     op.drop_constraint('room_room_owner_id_fkey', 'room', type_='foreignkey')
     op.drop_column('room', 'room_owner_id')
     op.alter_column('room', 'old_room_owner_id', new_column_name='room_owner_id')
 
     op.drop_column('room', 'room_id')
-    op.alter_column('room', 'old_id', new_column_name='id')
+    op.alter_column('room', 'old_id', new_column_name='room_id')
 
     # Create primary key constraints
-    op.create_primary_key('user_pkey', 'user', ['id'])
-    op.create_primary_key('item_pkey', 'item', ['id'])
-    op.create_primary_key('room_pkey', 'room', ['id'])
+    op.create_primary_key('user_pkey', 'user', ['user_id'])
+    op.create_primary_key('item_pkey', 'item', ['item_id'])
+    op.create_primary_key('room_pkey', 'room', ['room_id'])
 
     # Recreate foreign key constraints
-    op.create_foreign_key('item_current_owner_id_fkey', 'item', 'user', ['current_owner_id'], ['id'])
-    op.create_foreign_key('room_room_owner_id_fkey', 'room', 'user', ['room_owner_id'], ['id'])
+    op.create_foreign_key('item_current_owner_id_fkey', 'item', 'user', ['current_owner_id'], ['user_id'])
+    op.create_foreign_key('room_room_owner_id_fkey', 'room', 'user', ['room_owner_id'], ['user_id'])
